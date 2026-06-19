@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #4661F2;
+  --color-accent-strong: #3550E0;
+  --color-ink: #14161A;
+  --color-bg: #E9ECF2;
+  --color-danger: #C5403F;
+
+  --radius-control: 18px;
+  --radius-card: 24px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  --accent: #4661F2;
+  --accent-strong: #3550E0;
+  --accent-tint: rgba(70, 97, 242, 0.12);
+  --accent-soft: rgba(70, 97, 242, 0.2);
+  --ink: #14161A;
+  --ink-soft: rgba(20, 22, 26, 0.62);
+  --ink-faint: rgba(20, 22, 26, 0.42);
+  --bg: #E9ECF2;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --hairline: rgba(20, 22, 26, 0.08);
+  --danger: #C5403F;
+  --danger-tint: rgba(197, 64, 63, 0.12);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+input, button, textarea, select { font-family: inherit; }
+button { cursor: pointer; }
+
+/* App is mobile-only: constrain to a phone column on larger viewports */
+#root {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100svh;
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---- Glassmorphism ---- */
+.glass {
+  position: relative;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 10px 30px rgba(40, 45, 90, 0.12);
+  overflow: hidden;
+}
+.glass-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, transparent 32%, rgba(255, 255, 255, 0.6) 50%, transparent 68%);
+  background-size: 230% 100%;
+  animation: sheen 6.5s linear infinite;
+  pointer-events: none;
+}
+
+/* ---- Keyframes ---- */
+@keyframes sheen { 0% { background-position: 210% 0; } 100% { background-position: -110% 0; } }
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-6%, -5%) scale(1.12); } }
+@keyframes drift2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(7%, 6%) scale(1.15); } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+.anim-rise { animation: rise 0.5s both; }
+.anim-fade { animation: fade 0.35s both; }
+.anim-pop { animation: pop 0.25s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { animation: none !important; transition: none !important; }
+}
+
+/* ---- Charts ---- */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fadein { to { opacity: 1; } }
+@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.chart-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 1.1s ease forwards; }
+.chart-dot { opacity: 0; animation: fadein 0.3s ease forwards; animation-delay: 0.9s; }
+.chart-bar { transform-origin: bottom; animation: grow 0.7s cubic-bezier(.22,1,.36,1) both; }
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Remove tap highlight on mobile */
+a, button, [role="button"] { -webkit-tap-highlight-color: transparent; }
