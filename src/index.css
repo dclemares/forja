@@ -21,9 +21,9 @@
   --wood-top: #A06A35;
   --wood-bot: #7E5026;
   /* Oro botón */
-  --gold-top: #FBD269;
+  --gold-top: #FFD75C;
   --gold: #EFA838;
-  --gold-bot: #E0922C;
+  --gold-bot: #EDA31E;
   --gold-edge: #7A4A12;
   --gold-3d: #A66A18;
   /* Pergamino (interior de tarjetas) */
@@ -93,25 +93,17 @@ h1, h2, h3 { font-weight: 700; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), 0 
   pointer-events: none;
 }
 
-/* ---- Reflejo de oro (destello que barre los elementos dorados) ---- */
+/* ---- Brillo de oro pulido (franjas diagonales fijas, estilo metal brillante) ---- */
 .gold-shine { position: relative; overflow: hidden; }
 .gold-shine::after {
   content: "";
   position: absolute;
-  top: -30%;
-  height: 160%;
-  left: -40%;
-  width: 26%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.65) 50%, transparent);
-  transform: skewX(-16deg) translateX(0);
-  animation: goldglint 4.2s ease-in-out infinite;
+  inset: 0;
+  background:
+    linear-gradient(118deg, transparent 28%, rgba(255, 255, 255, 0.45) 36%, transparent 43%),
+    linear-gradient(118deg, transparent 50%, rgba(255, 255, 255, 0.22) 57%, transparent 63%);
   pointer-events: none;
   z-index: 2;
-}
-@keyframes goldglint {
-  0% { transform: skewX(-16deg) translateX(0); }
-  26% { transform: skewX(-16deg) translateX(580%); }
-  100% { transform: skewX(-16deg) translateX(580%); }
 }
 
 /* ---- Tablón de madera (cabeceras, barra) ---- */

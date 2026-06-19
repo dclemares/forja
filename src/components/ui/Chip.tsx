@@ -13,7 +13,7 @@ export function Chip({ active = false, children, style, ...rest }: ChipProps) {
         padding: '6px 13px',
         borderRadius: 999,
         border: active ? '2px solid #7A4A12' : '2px solid #9A6A3A',
-        background: active ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)',
+        background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)',
         color: active ? '#4A2E10' : '#6E4423',
         boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'inset 0 1px 0 rgba(255,255,255,.5)',
         cursor: 'pointer',

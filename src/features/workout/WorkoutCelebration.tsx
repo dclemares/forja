@@ -40,7 +40,7 @@ export function WorkoutCelebration({ volume, exercises, series, onClose }: Props
               transition={{ delay: 0.25 + i * 0.16, type: 'spring', stiffness: 320, damping: 11 }}
               style={{ display: 'flex', filter: 'drop-shadow(0 3px 2px rgba(120,74,18,.4))' }}
             >
-              <Star size={i === 1 ? 58 : 46} fill="#FBD269" color="#7A4A12" strokeWidth={2} />
+              <Star size={i === 1 ? 58 : 46} fill="#FFD75C" color="#7A4A12" strokeWidth={2} />
             </motion.span>
           ))}
         </div>

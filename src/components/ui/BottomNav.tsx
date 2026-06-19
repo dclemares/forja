@@ -74,7 +74,7 @@ const indicator: React.CSSProperties = {
   transition: 'background .2s',
 }
 const indicatorOn: React.CSSProperties = {
-  background: 'linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 50%), linear-gradient(180deg,#FBD269,#E0922C)',
+  background: 'linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 50%), linear-gradient(180deg,#FFD75C,#EDA31E)',
   border: '2px solid #7A4A12',
   boxShadow: 'inset 0 1px 0 rgba(255,240,200,.7)',
 }
@@ -84,7 +84,7 @@ const fab: React.CSSProperties = {
   flex: 'none',
   borderRadius: 18,
   border: '3px solid #7A4A12',
-  background: 'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 46%), linear-gradient(180deg,#FBD269,#E0922C)',
+  background: 'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 46%), linear-gradient(180deg,#FFD75C,#EDA31E)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

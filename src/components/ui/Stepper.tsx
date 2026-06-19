@@ -69,7 +69,7 @@ const btn: React.CSSProperties = {
   flex: 'none',
   borderRadius: 11,
   border: '2px solid #7A4A12',
-  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
+  background: 'linear-gradient(180deg,#FFD75C,#EDA31E)',
   color: '#4A2E10',
   display: 'flex',
   alignItems: 'center',

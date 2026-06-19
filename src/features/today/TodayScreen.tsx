@@ -179,7 +179,7 @@ export function TodayScreen() {
             </span>
             <button
               onClick={() => { const v = !soundOn; setSoundOn(v); setSoundEnabled(v); if (v) playClick() }}
-              style={{ border: '2px solid #7A4A12', borderRadius: 999, padding: '5px 18px', fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: soundOn ? '#4A2E10' : '#6E4423', background: soundOn ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.6)' }}
+              style={{ border: '2px solid #7A4A12', borderRadius: 999, padding: '5px 18px', fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: soundOn ? '#4A2E10' : '#6E4423', background: soundOn ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.6)' }}
             >
               {soundOn ? 'ON' : 'OFF'}
             </button>
@@ -230,7 +230,7 @@ const chip: React.CSSProperties = {
   color: 'var(--accent)', fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 18,
 }
 const iconCircle: React.CSSProperties = {
-  width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(180deg,#F5E9CB,#E6D2A2)', border: '2px solid #8A5A2A', color: '#E0922C',
+  width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(180deg,#F5E9CB,#E6D2A2)', border: '2px solid #8A5A2A', color: '#EDA31E',
   display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), 0 2px 0 #6E4423',
 }

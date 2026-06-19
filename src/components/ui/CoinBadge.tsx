@@ -10,7 +10,7 @@ export function CoinBadge({ children, size = 'md' }: { children: ReactNode; size
         alignItems: 'center',
         gap: 5,
         background:
-          'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 50%), linear-gradient(180deg,#FBD269,#E0922C)',
+          'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 50%), linear-gradient(180deg,#FFD75C,#EDA31E)',
         border: lg ? '2.5px solid #7A4A12' : '2px solid #7A4A12',
         borderRadius: 999,
         padding: lg ? '4px 16px' : '3px 12px',
