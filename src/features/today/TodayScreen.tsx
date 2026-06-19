@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronRight, LogOut, Play, Scale, TrendingDown, History as HistoryIcon, User } from 'lucide-react'
+import { CalendarDays, ChevronRight, LogOut, Play, Scale, Trash2, TrendingDown, History as HistoryIcon, User } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/auth'
 import { GlassCard } from '@/components/ui/GlassCard'
@@ -11,7 +11,7 @@ import { workoutVolume } from '@/lib/domain/volume'
 import { weeklyVolume, bodyweightTrend } from '@/lib/domain/trends'
 
 export function TodayScreen() {
-  const { state, startWorkout, startFreeWorkout, addBodyweight } = useStore()
+  const { state, startWorkout, startFreeWorkout, addBodyweight, resetAll } = useStore()
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
   const [pickOpen, setPickOpen] = useState(false)
@@ -175,6 +175,20 @@ export function TodayScreen() {
         <div style={{ padding: '4px 2px 12px' }}>
           <div style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 14 }}>{session?.user.email}</div>
           <PillButton full variant="ghost" icon={<LogOut size={16} />} onClick={() => signOut()}>Cerrar sesión</PillButton>
+          <PillButton
+            full
+            variant="danger"
+            icon={<Trash2 size={16} />}
+            style={{ marginTop: 10 }}
+            onClick={() => {
+              if (window.confirm('¿Borrar TODOS tus datos (ejercicios, sesiones, entrenamientos y peso)? Empezarás de cero. No se puede deshacer.')) {
+                resetAll()
+                setProfileOpen(false)
+              }
+            }}
+          >
+            Borrar todos mis datos
+          </PillButton>
         </div>
       </Sheet>
     </div>

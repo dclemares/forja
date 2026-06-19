@@ -62,6 +62,8 @@ export interface StoreActions {
   addBodyweight: (date: string, weight: number) => void
   updateBodyweight: (id: string, patch: Partial<Pick<BodyweightLog, 'date' | 'weight'>>) => void
   deleteBodyweight: (id: string) => void
+  // cuenta
+  resetAll: () => void
 }
 
 interface StoreValue extends StoreActions {
@@ -232,6 +234,16 @@ export function StoreProvider({ children, initial, cloudUserId }: { children: Re
       },
       deleteBodyweight(id) {
         setState((s) => ({ ...s, bodyweight: s.bodyweight.filter((b) => b.id !== id) }))
+      },
+      resetAll() {
+        setState({
+          exercises: [],
+          sessions: [],
+          weeklyPlan: { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null, 6: null },
+          workouts: [],
+          bodyweight: [],
+          activeWorkoutId: null,
+        })
       },
     }),
     [mapWorkout, mapWorkoutExercise],
