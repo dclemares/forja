@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { iconBtn } from './AppBar'
@@ -12,11 +12,29 @@ interface SheetProps {
 }
 
 export function Sheet({ open, onClose, title, children }: SheetProps) {
+  // Ajusta la hoja al área visible (por encima del teclado en móvil).
+  const [vh, setVh] = useState<number | null>(null)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!open || !vv) {
+      setVh(null)
+      return
+    }
+    const update = () => setVh(vv.height)
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
+  }, [open])
+
   return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
-          style={scrim}
+          style={vh != null ? { ...scrim, bottom: 'auto', height: vh } : scrim}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -63,7 +81,7 @@ const scrim: React.CSSProperties = {
 const sheet: React.CSSProperties = {
   width: '100%',
   maxWidth: 480,
-  maxHeight: '85vh',
+  maxHeight: '92%',
   borderRadius: '24px 24px 0 0',
   padding: '10px 16px max(16px, env(safe-area-inset-bottom))',
   display: 'flex',
