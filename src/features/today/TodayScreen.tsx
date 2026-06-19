@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
 import { Sheet } from '@/components/ui/Sheet'
+import { titlePlaque } from '@/components/ui/AppBar'
 import { formatLongDate, formatNumber, todayISO } from '@/lib/format'
 import { workoutVolume } from '@/lib/domain/volume'
 import { weeklyVolume, bodyweightTrend } from '@/lib/domain/trends'
@@ -40,8 +41,8 @@ export function TodayScreen() {
     <div className="anim-rise">
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '6px 4px 16px' }}>
         <div>
-          <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{formatLongDate(todayISO())}</div>
-          <h1 style={{ margin: '2px 0 0', fontSize: 26, fontWeight: 600, letterSpacing: '-0.5px' }}>Entrenar</h1>
+          <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 7 }}>{formatLongDate(todayISO())}</div>
+          <h1 style={titlePlaque}>Entrenar</h1>
         </div>
         {session && (
           <button aria-label="Perfil" onClick={() => setProfileOpen(true)} style={{ width: 46, height: 46, borderRadius: 999, border: '2.5px solid #4A2E16', background: 'linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 'none', boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), 0 3px 0 #34200E' }}>

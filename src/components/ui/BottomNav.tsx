@@ -73,21 +73,21 @@ const indicator: React.CSSProperties = {
   transition: 'background .2s',
 }
 const indicatorOn: React.CSSProperties = {
-  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
+  background: 'linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 50%), linear-gradient(180deg,#FBD269,#E0922C)',
   border: '2px solid #7A4A12',
   boxShadow: 'inset 0 1px 0 rgba(255,240,200,.7)',
 }
 const fab: React.CSSProperties = {
-  width: 60,
-  height: 50,
+  width: 64,
+  height: 54,
   flex: 'none',
-  borderRadius: 16,
-  border: '2.5px solid #7A4A12',
-  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
+  borderRadius: 18,
+  border: '3px solid #7A4A12',
+  background: 'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 46%), linear-gradient(180deg,#FBD269,#E0922C)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  marginTop: -6,
-  boxShadow: 'inset 0 2px 0 rgba(255,240,200,.75), 0 4px 0 #A66A18, 0 7px 10px rgba(20,12,4,.45)',
+  marginTop: -10,
+  boxShadow: 'inset 0 2px 0 rgba(255,245,210,.85), 0 4px 0 #A66A18, 0 8px 12px rgba(20,12,4,.5), 0 0 16px rgba(255,205,90,.45)',
 }

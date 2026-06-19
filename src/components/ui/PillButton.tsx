@@ -46,7 +46,7 @@ export function PillButton({ variant = 'primary', size = 'md', full = false, ico
         letterSpacing: '0.2px',
         lineHeight: 1.1,
         cursor: 'pointer',
-        background: v.bg,
+        background: v.flat ? v.bg : `linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0) 48%), ${v.bg}`,
         color: v.color,
         border: `2.5px ${v.dashed ? 'dashed' : 'solid'} ${v.border}`,
         borderRadius: size === 'lg' ? 16 : 'var(--radius-control)',
