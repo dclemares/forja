@@ -51,7 +51,7 @@ export function TodayScreen() {
       </header>
 
       {active && (
-        <GlassCard style={{ padding: 15, marginBottom: 12, border: '1px solid var(--accent-soft)' }}>
+        <GlassCard style={{ padding: 15, marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <div>
               <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>Entrenamiento en curso</div>
