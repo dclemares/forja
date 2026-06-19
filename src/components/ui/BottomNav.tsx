@@ -16,7 +16,7 @@ export function BottomNav() {
     <nav style={navStyle}>
       <Tab tab={tabs[0]} />
       <Tab tab={tabs[1]} />
-      <button aria-label="Entrenar" style={fab} onClick={() => { playClick(); navigate('/') }}>
+      <button aria-label="Entrenar" className="gold-shine" style={fab} onClick={() => { playClick(); navigate('/') }}>
         <Play size={24} fill="#4A2E10" color="#4A2E10" />
       </button>
       <Tab tab={tabs[2]} />

@@ -29,7 +29,7 @@ const V: Record<Variant, VStyle> = {
   dashed: { bg: 'rgba(247,231,194,.45)', color: '#7A4A12', border: '#8A5A2A', threeD: 'transparent', highlight: 'transparent', dashed: true, flat: true },
 }
 
-export function PillButton({ variant = 'primary', size = 'md', full = false, icon, children, style, ...rest }: PillButtonProps) {
+export function PillButton({ variant = 'primary', size = 'md', full = false, icon, children, style, className, ...rest }: PillButtonProps) {
   const v = V[variant]
   const depth = v.flat ? 0 : size === 'lg' ? 5 : 4
   const shadow = (d: number) =>
@@ -37,6 +37,7 @@ export function PillButton({ variant = 'primary', size = 'md', full = false, ico
 
   return (
     <button
+      className={`${variant === 'primary' ? 'gold-shine' : ''} ${className ?? ''}`.trim() || undefined}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

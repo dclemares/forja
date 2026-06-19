@@ -93,6 +93,27 @@ h1, h2, h3 { font-weight: 700; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), 0 
   pointer-events: none;
 }
 
+/* ---- Reflejo de oro (destello que barre los elementos dorados) ---- */
+.gold-shine { position: relative; overflow: hidden; }
+.gold-shine::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  height: 160%;
+  left: -40%;
+  width: 26%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.65) 50%, transparent);
+  transform: skewX(-16deg) translateX(0);
+  animation: goldglint 4.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+@keyframes goldglint {
+  0% { transform: skewX(-16deg) translateX(0); }
+  26% { transform: skewX(-16deg) translateX(580%); }
+  100% { transform: skewX(-16deg) translateX(580%); }
+}
+
 /* ---- Tablón de madera (cabeceras, barra) ---- */
 .wood {
   background: linear-gradient(180deg, var(--wood-top), var(--wood-bot));

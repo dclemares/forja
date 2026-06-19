@@ -4,6 +4,7 @@ export function CoinBadge({ children, size = 'md' }: { children: ReactNode; size
   const lg = size === 'lg'
   return (
     <span
+      className="gold-shine"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
