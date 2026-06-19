@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChartLine, Plus, Search } from 'lucide-react'
+import { ChartLine, Dumbbell, Plus, Search } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
@@ -57,7 +58,7 @@ export function ExercisesScreen() {
           </div>
         </GlassCard>
       ))}
-      {list.length === 0 && <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 14, padding: '20px 0' }}>Sin ejercicios.</div>}
+      {list.length === 0 && <EmptyState icon={<Dumbbell size={40} />} title="Aún no tienes ejercicios" hint="Pulsa + para crear el primero" />}
 
       <Sheet open={createOpen} onClose={() => setCreateOpen(false)} title="Crear ejercicio">
         <div style={{ padding: '4px 2px 12px' }}>

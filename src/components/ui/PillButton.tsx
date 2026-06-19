@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { playClick } from '@/lib/sound'
 
 type Variant = 'primary' | 'tonal' | 'ghost' | 'danger' | 'dashed'
 
@@ -59,6 +60,7 @@ export function PillButton({ variant = 'primary', size = 'md', full = false, ico
         ...style,
       }}
       onPointerDown={(e) => {
+        playClick()
         e.currentTarget.style.transform = `translateY(${depth}px)`
         e.currentTarget.style.boxShadow = shadow(0)
       }}

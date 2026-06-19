@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Scale, Trash2 } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
@@ -58,7 +59,7 @@ export function BodyweightScreen() {
           </div>
         </GlassCard>
       ))}
-      {sorted.length === 0 && <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 14, padding: '20px 0' }}>Sin registros.</div>}
+      {sorted.length === 0 && <EmptyState icon={<Scale size={40} />} title="Sin registros de peso" hint="Pulsa Registrar para añadir el primero" />}
 
       <Sheet open={open} onClose={() => setOpen(false)} title={editId ? 'Editar registro' : 'Nuevo registro'}>
         <div style={{ padding: '4px 2px 12px' }}>

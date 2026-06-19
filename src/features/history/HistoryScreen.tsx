@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, History } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { AppBar } from '@/components/ui/AppBar'
@@ -32,7 +33,7 @@ export function HistoryScreen() {
           </div>
         </GlassCard>
       ))}
-      {workouts.length === 0 && <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 14, padding: '24px 0' }}>Aún no has registrado entrenamientos.</div>}
+      {workouts.length === 0 && <EmptyState icon={<History size={40} />} title="Aún no hay entrenamientos" hint="Tus entrenos completados aparecerán aquí" />}
     </div>
   )
 }

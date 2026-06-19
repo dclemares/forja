@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronRight, LogOut, Play, Scale, Trash2, TrendingDown, History as HistoryIcon, User } from 'lucide-react'
+import { CalendarDays, ChevronRight, LogOut, Play, Scale, Trash2, TrendingDown, History as HistoryIcon, User, Volume2, VolumeX } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/auth'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
+import { CoinBadge } from '@/components/ui/CoinBadge'
 import { Sheet } from '@/components/ui/Sheet'
 import { titlePlaque } from '@/components/ui/AppBar'
+import { isSoundEnabled, setSoundEnabled, playClick } from '@/lib/sound'
 import { formatLongDate, formatNumber, todayISO } from '@/lib/format'
 import { workoutVolume } from '@/lib/domain/volume'
 import { weeklyVolume, bodyweightTrend } from '@/lib/domain/trends'
@@ -18,6 +20,7 @@ export function TodayScreen() {
   const [pickOpen, setPickOpen] = useState(false)
   const [bwOpen, setBwOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [soundOn, setSoundOn] = useState(isSoundEnabled())
 
   const planDay = (new Date().getDay() + 6) % 7
   const plannedId = state.weeklyPlan[planDay]
@@ -102,16 +105,14 @@ export function TodayScreen() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
         <GlassCard style={{ padding: 16 }}>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Volumen semanal</div>
-          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4, color: 'var(--accent)' }}>
-            {formatNumber(thisWeek)}
-            <span style={{ fontSize: 13, color: 'var(--ink-soft)', fontWeight: 400 }}> kg</span>
+          <div style={{ marginTop: 8 }}>
+            <CoinBadge>{formatNumber(thisWeek)} kg</CoinBadge>
           </div>
         </GlassCard>
         <GlassCard style={{ padding: 16, cursor: 'pointer' }} onClick={() => navigate('/bodyweight')}>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Peso corporal</div>
-          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>
-            {lastBody ? lastBody.weight.toFixed(1).replace('.', ',') : '—'}
-            <span style={{ fontSize: 13, color: 'var(--ink-soft)', fontWeight: 400 }}> kg</span>
+          <div style={{ marginTop: 8 }}>
+            <CoinBadge>{lastBody ? `${lastBody.weight.toFixed(1).replace('.', ',')} kg` : '—'}</CoinBadge>
           </div>
           {lastBody && (
             <div style={{ fontSize: 12, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 6 }}>
@@ -175,6 +176,17 @@ export function TodayScreen() {
       <Sheet open={profileOpen} onClose={() => setProfileOpen(false)} title="Tu cuenta">
         <div style={{ padding: '4px 2px 12px' }}>
           <div style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 14 }}>{session?.user.email}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 16px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15, fontWeight: 600 }}>
+              {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />} Sonidos
+            </span>
+            <button
+              onClick={() => { const v = !soundOn; setSoundOn(v); setSoundEnabled(v); if (v) playClick() }}
+              style={{ border: '2px solid #7A4A12', borderRadius: 999, padding: '5px 18px', fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: soundOn ? '#4A2E10' : '#6E4423', background: soundOn ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.6)' }}
+            >
+              {soundOn ? 'ON' : 'OFF'}
+            </button>
+          </div>
           <PillButton full variant="ghost" icon={<LogOut size={16} />} onClick={() => signOut()}>Cerrar sesión</PillButton>
           <PillButton
             full

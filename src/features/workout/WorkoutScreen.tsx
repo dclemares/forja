@@ -7,6 +7,7 @@ import { PillButton } from '@/components/ui/PillButton'
 import { AppBar } from '@/components/ui/AppBar'
 import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { ExercisePicker } from './ExercisePicker'
+import { WorkoutCelebration } from './WorkoutCelebration'
 import { exerciseVolume, formatSetsSummary, workoutSetCount, workoutVolume } from '@/lib/domain/volume'
 import { formatNumber } from '@/lib/format'
 
@@ -17,6 +18,7 @@ export function WorkoutScreen() {
   const workout = state.workouts.find((w) => w.id === id)
   const [addOpen, setAddOpen] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => setElapsed((e) => e + 1), 1000)
@@ -34,7 +36,7 @@ export function WorkoutScreen() {
 
   const finish = () => {
     finishWorkout(workout.id)
-    navigate(`/history/${workout.id}`)
+    setDone(true)
   }
 
   return (
@@ -91,6 +93,15 @@ export function WorkoutScreen() {
         excludeIds={workout.exercises.map((e) => e.exerciseId).filter(Boolean) as string[]}
         onPick={(ex) => addWorkoutExercise(workout.id, { exerciseId: ex.id, name: ex.name, muscleGroup: ex.muscleGroup })}
       />
+
+      {done && (
+        <WorkoutCelebration
+          volume={workoutVolume(workout)}
+          exercises={workout.exercises.length}
+          series={workoutSetCount(workout)}
+          onClose={() => navigate('/')}
+        />
+      )}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, ClipboardList, Plus } from 'lucide-react'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
@@ -55,7 +56,7 @@ export function SessionsScreen() {
           </div>
         </GlassCard>
       ))}
-      {state.sessions.length === 0 && <Empty>Crea tu primera sesión.</Empty>}
+      {state.sessions.length === 0 && <EmptyState icon={<ClipboardList size={40} />} title="Sin sesiones todavía" hint="Crea tu primera rutina con +" />}
 
       <Sheet open={newOpen} onClose={() => setNewOpen(false)} title="Nueva sesión">
         <div style={{ padding: '4px 2px 12px' }}>
@@ -80,10 +81,6 @@ export function SessionsScreen() {
 
 const abbrev = (n: string) => (n.length > 7 ? n.slice(0, 6) + '…' : n)
 const fullDay = (i: number) => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][i]
-
-function Empty({ children }: { children: React.ReactNode }) {
-  return <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 14, padding: '24px 0' }}>{children}</div>
-}
 
 const dayCell: React.CSSProperties = { flex: 1, textAlign: 'center', background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', border: '2px solid #9A6A3A', borderRadius: 11, padding: '8px 1px', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)' }
 const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(120,80,30,.1)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }

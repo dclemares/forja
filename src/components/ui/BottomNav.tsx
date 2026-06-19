@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { BarChart3, Dumbbell, History, ClipboardList, Play } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { playClick } from '@/lib/sound'
 
 const tabs: { to: string; label: string; icon: ReactNode }[] = [
   { to: '/sessions', label: 'Sesiones', icon: <ClipboardList size={22} /> },
@@ -15,7 +16,7 @@ export function BottomNav() {
     <nav style={navStyle}>
       <Tab tab={tabs[0]} />
       <Tab tab={tabs[1]} />
-      <button aria-label="Entrenar" style={fab} onClick={() => navigate('/')}>
+      <button aria-label="Entrenar" style={fab} onClick={() => { playClick(); navigate('/') }}>
         <Play size={24} fill="#4A2E10" color="#4A2E10" />
       </button>
       <Tab tab={tabs[2]} />
@@ -26,7 +27,7 @@ export function BottomNav() {
 
 function Tab({ tab }: { tab: { to: string; label: string; icon: ReactNode } }) {
   return (
-    <NavLink to={tab.to} style={{ textDecoration: 'none', flex: 1 }}>
+    <NavLink to={tab.to} onClick={playClick} style={{ textDecoration: 'none', flex: 1 }}>
       {({ isActive }) => (
         <div style={itemWrap}>
           <span style={{ ...indicator, ...(isActive ? indicatorOn : null) }}>
