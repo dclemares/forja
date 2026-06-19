@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Dumbbell, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
 import { AppBar, iconBtn } from '@/components/ui/AppBar'
 import { Sheet } from '@/components/ui/Sheet'
+import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { ExercisePicker } from '@/features/workout/ExercisePicker'
+import type { Exercise } from '@/lib/types'
 
 export function SessionDetailScreen() {
   const { id = '' } = useParams()
@@ -24,7 +26,7 @@ export function SessionDetailScreen() {
 
   const exercises = session.exerciseIds
     .map((eid) => state.exercises.find((e) => e.id === eid))
-    .filter(Boolean) as { id: string; name: string; muscleGroup: string }[]
+    .filter(Boolean) as Exercise[]
 
   return (
     <div className="anim-fade">
@@ -39,7 +41,7 @@ export function SessionDetailScreen() {
       {exercises.map((e) => (
         <GlassCard key={e.id} style={{ padding: 13, marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={iconCircle}><Dumbbell size={18} /></span>
+            <MuscleIconBadge group={e.muscleGroup} size={38} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{e.name}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{e.muscleGroup}</div>
@@ -82,7 +84,6 @@ export function SessionDetailScreen() {
   )
 }
 
-const iconCircle: React.CSSProperties = { width: 38, height: 38, borderRadius: 12, background: 'var(--accent-tint)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }
 const delBtn: React.CSSProperties = { width: 34, height: 34, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
 const menuItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--ink)', textAlign: 'left' }
 const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)', borderRadius: 14, padding: '12px', color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }

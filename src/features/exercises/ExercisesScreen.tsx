@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChartLine, Dumbbell, Plus, Search } from 'lucide-react'
+import { ChartLine, Plus, Search } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
 import { AppBar } from '@/components/ui/AppBar'
 import { Chip } from '@/components/ui/Chip'
+import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { Sheet } from '@/components/ui/Sheet'
 import { MUSCLE_GROUPS } from '@/lib/types'
 import type { MuscleGroup } from '@/lib/types'
@@ -47,7 +48,7 @@ export function ExercisesScreen() {
       {list.map((e) => (
         <GlassCard key={e.id} style={{ padding: 13, marginBottom: 10, cursor: 'pointer' }} onClick={() => navigate(`/exercises/${e.id}`)}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={iconCircle}><Dumbbell size={18} /></span>
+            <MuscleIconBadge group={e.muscleGroup} size={38} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{e.name}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{e.muscleGroup}</div>
@@ -72,5 +73,4 @@ export function ExercisesScreen() {
   )
 }
 
-const iconCircle: React.CSSProperties = { width: 38, height: 38, borderRadius: 12, background: 'var(--accent-tint)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }
 const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)', borderRadius: 14, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }

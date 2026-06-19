@@ -54,6 +54,9 @@ const navStyle: React.CSSProperties = {
   padding: '8px 6px',
   borderRadius: 26,
   zIndex: 30,
+  background: 'rgba(255,255,255,0.92)',
+  border: '1px solid rgba(255,255,255,0.95)',
+  boxShadow: '0 8px 28px rgba(40,45,90,0.20)',
 }
 const itemWrap: React.CSSProperties = {
   display: 'flex',

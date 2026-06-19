@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ChevronRight, Dumbbell, Plus, Search } from 'lucide-react'
+import { ChevronRight, Plus, Search } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { PillButton } from '@/components/ui/PillButton'
 import { Chip } from '@/components/ui/Chip'
+import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { useStore } from '@/lib/store'
 import { MUSCLE_GROUPS } from '@/lib/types'
 import type { Exercise, MuscleGroup } from '@/lib/types'
@@ -101,7 +102,7 @@ export function ExercisePicker({ open, onClose, relatedMuscle, onPick, title = '
 function Row({ ex, onClick }: { ex: Exercise; onClick: () => void }) {
   return (
     <button style={rowBtn} onClick={onClick}>
-      <span style={iconCircle}><Dumbbell size={18} /></span>
+      <MuscleIconBadge group={ex.muscleGroup} size={38} />
       <div style={{ textAlign: 'left' }}>
         <div style={{ fontWeight: 600, fontSize: 15 }}>{ex.name}</div>
         <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{ex.muscleGroup}</div>
@@ -118,10 +119,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 const rowBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 11, width: '100%', padding: '11px 6px',
   background: 'none', border: 'none', borderBottom: '1px solid rgba(20,22,26,.06)', cursor: 'pointer', fontFamily: 'inherit',
-}
-const iconCircle: React.CSSProperties = {
-  width: 38, height: 38, borderRadius: 12, background: 'var(--accent-tint)', color: 'var(--accent)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none',
 }
 const inputStyle: React.CSSProperties = {
   width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)',

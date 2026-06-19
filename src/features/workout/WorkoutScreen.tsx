@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronRight, CircleCheck, Dumbbell, Plus } from 'lucide-react'
+import { Check, ChevronRight, CircleCheck, Plus } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
 import { AppBar } from '@/components/ui/AppBar'
+import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { ExercisePicker } from './ExercisePicker'
 import { exerciseVolume, formatSetsSummary, workoutSetCount, workoutVolume } from '@/lib/domain/volume'
 import { formatNumber } from '@/lib/format'
@@ -60,7 +61,7 @@ export function WorkoutScreen() {
         return (
           <GlassCard key={we.id} style={{ padding: 14, marginBottom: 11, cursor: 'pointer' }} onClick={() => navigate(`/workout/${workout.id}/ex/${we.id}`)}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={iconCircle}><Dumbbell size={20} /></span>
+              <MuscleIconBadge group={we.muscleGroup} size={42} />
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: 15 }}>{we.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--ink-soft)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -113,8 +114,4 @@ function fmtTime(s: number) {
 
 const summary: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 20, padding: '14px 18px', marginBottom: 14, background: 'var(--accent-tint)',
-}
-const iconCircle: React.CSSProperties = {
-  width: 42, height: 42, borderRadius: 13, background: 'var(--accent-tint)', color: 'var(--accent)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none',
 }
