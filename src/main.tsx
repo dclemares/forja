@@ -5,7 +5,7 @@ import './index.css'
 import App from './App'
 import { StoreProvider } from './lib/store'
 import type { AppState } from './lib/store'
-import { buildSeed, buildStarter } from './lib/seed'
+import { buildSeed, buildEmpty } from './lib/seed'
 import { isSupabaseConfigured } from './lib/supabase'
 import { AuthProvider, useAuth } from './lib/auth'
 import { AuthScreen } from './features/auth/AuthScreen'
@@ -30,7 +30,7 @@ function CloudGate({ userId }: { userId: string }) {
     ;(async () => {
       let s = await loadState(userId)
       if (!s) {
-        s = buildStarter()
+        s = buildEmpty()
         await saveState(userId, s)
       }
       if (active) setInitial(s)

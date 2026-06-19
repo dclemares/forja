@@ -1,6 +1,6 @@
 import type { AppState } from './store'
 import type { Exercise, MuscleGroup, Workout, WorkoutExercise } from './types'
-import { todayISO, uid } from './format'
+import { uid } from './format'
 
 const mkEx = (id: string, name: string, muscleGroup: MuscleGroup): Exercise => ({
   id,
@@ -94,31 +94,12 @@ export function buildSeed(): AppState {
   }
 }
 
-/** Estado de arranque para un usuario NUEVO en la nube: biblioteca + sesiones
- *  con ids uuid, sin historial ni peso corporal inventados. */
-export function buildStarter(): AppState {
-  const mk = (name: string, mg: MuscleGroup): Exercise => ({ id: uid(), name, muscleGroup: mg, createdAt: todayISO() })
-  const lib = {
-    pressMaq: mk('Press de pecho en máquina', 'Pecho'),
-    pressInc: mk('Press inclinado con mancuernas', 'Pecho'),
-    aperturas: mk('Aperturas en polea', 'Pecho'),
-    bicepsBanco: mk('Bíceps en banco inclinado', 'Bíceps'),
-    curlManc: mk('Curl con mancuernas', 'Bíceps'),
-    jalon: mk('Jalón al pecho', 'Espalda'),
-    remo: mk('Remo en máquina', 'Espalda'),
-    sentadilla: mk('Sentadilla', 'Pierna'),
-    prensa: mk('Prensa', 'Pierna'),
-    pressMilitar: mk('Press militar', 'Hombro'),
-    tricepPolea: mk('Extensión de tríceps en polea', 'Tríceps'),
-    crunch: mk('Crunch abdominal', 'Abdomen'),
-  }
-  const pecho = { id: uid(), name: 'Pecho 1', exerciseIds: [lib.pressMaq.id, lib.pressInc.id, lib.aperturas.id, lib.bicepsBanco.id], createdAt: todayISO() }
-  const espalda = { id: uid(), name: 'Espalda 1', exerciseIds: [lib.jalon.id, lib.remo.id, lib.curlManc.id], createdAt: todayISO() }
-  const pierna = { id: uid(), name: 'Pierna 1', exerciseIds: [lib.sentadilla.id, lib.prensa.id, lib.pressMilitar.id], createdAt: todayISO() }
+/** Estado de arranque para un usuario NUEVO: cuenta completamente vacía. */
+export function buildEmpty(): AppState {
   return {
-    exercises: Object.values(lib),
-    sessions: [pecho, espalda, pierna],
-    weeklyPlan: { 0: pecho.id, 1: espalda.id, 2: null, 3: pecho.id, 4: espalda.id, 5: pierna.id, 6: null },
+    exercises: [],
+    sessions: [],
+    weeklyPlan: { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null, 6: null },
     workouts: [],
     bodyweight: [],
     activeWorkoutId: null,
