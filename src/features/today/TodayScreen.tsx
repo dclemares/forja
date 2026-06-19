@@ -133,12 +133,9 @@ export function TodayScreen() {
                 <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{last.exercises.length} ejercicios</div>
               </div>
             </div>
-            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div>
-                <div style={{ fontWeight: 600, color: 'var(--accent)' }}>{formatNumber(workoutVolume(last))}</div>
-                <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>kg</div>
-              </div>
-              <ChevronRight size={18} color="var(--ink-faint)" />
+            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <CoinBadge>{formatNumber(workoutVolume(last))} kg</CoinBadge>
+              <ChevronRight size={18} color="#8A5A2A" />
             </div>
           </div>
         </GlassCard>
@@ -182,7 +179,7 @@ export function TodayScreen() {
             </span>
             <button
               onClick={() => { const v = !soundOn; setSoundOn(v); setSoundEnabled(v); if (v) playClick() }}
-              style={{ border: '2px solid #7A4A12', borderRadius: 999, padding: '5px 18px', fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: soundOn ? '#4A2E10' : '#6E4423', background: soundOn ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.6)' }}
+              style={{ border: '2px solid #7A4A12', borderRadius: 999, padding: '5px 18px', fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: soundOn ? '#4A2E10' : '#6E4423', background: soundOn ? 'linear-gradient(180deg,#E6C06A,#B07E22)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.6)' }}
             >
               {soundOn ? 'ON' : 'OFF'}
             </button>
@@ -218,7 +215,7 @@ function BodyweightSheet({ open, onClose, onSave }: { open: boolean; onClose: ()
           inputMode="decimal"
           value={val}
           onChange={(e) => setVal(e.target.value)}
-          style={{ width: '100%', fontSize: 22, fontWeight: 700, textAlign: 'center', padding: '14px', borderRadius: 14, border: '2px solid #9A6A3A', background: 'rgba(120,80,30,.1)', color: 'var(--ink)', fontFamily: 'inherit', marginBottom: 12, outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }}
+          style={{ width: '100%', fontSize: 22, fontWeight: 700, textAlign: 'center', padding: '14px', borderRadius: 14, border: '2px solid #9A6A3A', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', color: 'var(--ink)', fontFamily: 'inherit', marginBottom: 12, outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }}
         />
         <PillButton full size="lg" onClick={() => { const n = parseFloat(val.replace(',', '.')); if (Number.isFinite(n)) onSave(n) }}>
           Guardar
@@ -233,8 +230,9 @@ const chip: React.CSSProperties = {
   color: 'var(--accent)', fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 18,
 }
 const iconCircle: React.CSSProperties = {
-  width: 40, height: 40, borderRadius: 12, background: 'var(--accent-tint)', color: 'var(--accent)',
+  width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(180deg,#F5E9CB,#E6D2A2)', border: '2px solid #8A5A2A', color: '#B07E22',
   display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), 0 2px 0 #6E4423',
 }
 const rowBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',

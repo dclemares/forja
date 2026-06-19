@@ -69,13 +69,13 @@ const btn: React.CSSProperties = {
   flex: 'none',
   borderRadius: 11,
   border: '2px solid #7A4A12',
-  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
+  background: 'linear-gradient(180deg,#E6C06A,#B07E22)',
   color: '#4A2E10',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  boxShadow: 'inset 0 1px 0 rgba(255,240,200,.7), 0 2px 0 #A66A18',
+  boxShadow: 'inset 0 1px 0 rgba(255,240,200,.7), 0 2px 0 #7C5413',
 }
 const input: React.CSSProperties = {
   flex: 1,

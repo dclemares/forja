@@ -21,11 +21,11 @@
   --wood-top: #A06A35;
   --wood-bot: #7E5026;
   /* Oro botón */
-  --gold-top: #FBD269;
-  --gold: #EFA838;
-  --gold-bot: #E0922C;
+  --gold-top: #E6C06A;
+  --gold: #C5942F;
+  --gold-bot: #B07E22;
   --gold-edge: #7A4A12;
-  --gold-3d: #A66A18;
+  --gold-3d: #7C5413;
   /* Pergamino (interior de tarjetas) */
   --parch-top: #F4E3BE;
   --parch-bot: #E7D0A0;
@@ -70,6 +70,8 @@ h1, h2, h3 { font-weight: 700; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), 0 
 .glass {
   position: relative;
   background:
+    repeating-linear-gradient(0deg, rgba(150, 115, 60, 0.05) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, rgba(150, 115, 60, 0.04) 0 1px, transparent 1px 7px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 22%),
     linear-gradient(180deg, var(--parch-top), var(--parch-bot));
   border: 3px solid var(--wood-edge);
