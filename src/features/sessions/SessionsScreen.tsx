@@ -85,6 +85,6 @@ function Empty({ children }: { children: React.ReactNode }) {
   return <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 14, padding: '24px 0' }}>{children}</div>
 }
 
-const dayCell: React.CSSProperties = { flex: 1, textAlign: 'center', background: 'rgba(255,255,255,.5)', border: '1px solid rgba(20,22,26,.08)', borderRadius: 11, padding: '8px 1px', fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }
-const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)', borderRadius: 14, padding: '12px', color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }
+const dayCell: React.CSSProperties = { flex: 1, textAlign: 'center', background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', border: '2px solid #9A6A3A', borderRadius: 11, padding: '8px 1px', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)' }
+const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(120,80,30,.1)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const rowBtn: React.CSSProperties = { display: 'block', width: '100%', padding: '13px 6px', background: 'none', border: 'none', borderBottom: '1px solid rgba(20,22,26,.07)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--ink)', textAlign: 'left' }

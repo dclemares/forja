@@ -121,7 +121,8 @@ const rowBtn: React.CSSProperties = {
   background: 'none', border: 'none', borderBottom: '1px solid rgba(20,22,26,.06)', cursor: 'pointer', fontFamily: 'inherit',
 }
 const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)',
-  borderRadius: 14, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', outline: 'none',
+  width: '100%', background: 'rgba(120,80,30,.1)', border: '2px solid #9A6A3A',
+  borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none',
+  boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)',
 }
 const empty: React.CSSProperties = { padding: '14px 6px', color: 'var(--ink-faint)', fontSize: 14 }

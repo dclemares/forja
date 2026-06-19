@@ -28,7 +28,7 @@ export function AuthScreen() {
       <AnimatedBackground />
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100svh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px 18px' }}>
         <div style={{ textAlign: 'center', marginBottom: 26 }}>
-          <div style={logo}><Dumbbell size={30} color="#fff" /></div>
+          <div style={logo}><Dumbbell size={32} color="#4A2E10" strokeWidth={2.6} /></div>
           <h1 style={{ fontSize: 28, fontWeight: 600, margin: '14px 0 4px' }}>Forja</h1>
           <p style={{ color: 'var(--ink-soft)', fontSize: 14, margin: 0 }}>Tu diario de entrenamientos</p>
         </div>
@@ -58,13 +58,13 @@ export function AuthScreen() {
 
 function SegBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 14, padding: 9, borderRadius: 11, border: active ? '1px solid rgba(20,22,26,.1)' : '1px solid transparent', background: active ? 'rgba(255,255,255,.85)' : 'transparent', color: active ? 'var(--accent)' : 'var(--ink-soft)', fontWeight: active ? 600 : 400, cursor: 'pointer', fontFamily: 'inherit' }}>
+    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 14, padding: 9, borderRadius: 10, border: active ? '2px solid #7A4A12' : '2px solid transparent', background: active ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'transparent', color: active ? '#4A2E10' : '#6E4423', fontWeight: 700, boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
       {children}
     </button>
   )
 }
 
-const logo: React.CSSProperties = { width: 64, height: 64, borderRadius: 20, background: 'var(--accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 24px rgba(70,97,242,.4)' }
-const seg: React.CSSProperties = { display: 'flex', background: 'rgba(255,255,255,.45)', border: '1px solid rgba(20,22,26,.08)', borderRadius: 13, padding: 3, marginBottom: 16 }
-const lbl: React.CSSProperties = { display: 'block', fontSize: 13, color: 'var(--ink-soft)', margin: '12px 0 6px' }
-const input: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.12)', borderRadius: 14, padding: '12px', color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }
+const logo: React.CSSProperties = { width: 70, height: 70, borderRadius: 22, background: 'linear-gradient(180deg,#FBD269,#E0922C)', border: '3px solid #7A4A12', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 2px 0 rgba(255,240,200,.7), 0 5px 0 #A66A18, 0 9px 14px rgba(30,18,6,.4)' }
+const seg: React.CSSProperties = { display: 'flex', background: 'rgba(120,80,30,.16)', border: '2px solid #9A6A3A', borderRadius: 13, padding: 3, marginBottom: 16, boxShadow: 'inset 0 2px 4px rgba(80,50,20,.25)' }
+const lbl: React.CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', margin: '12px 0 6px' }
+const input: React.CSSProperties = { width: '100%', background: 'rgba(120,80,30,.1)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }

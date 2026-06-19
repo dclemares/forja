@@ -9,12 +9,13 @@ export function Chip({ active = false, children, style, ...rest }: ChipProps) {
     <button
       style={{
         fontSize: 13,
-        fontWeight: 500,
+        fontWeight: 700,
         padding: '6px 13px',
         borderRadius: 999,
-        border: active ? '1px solid var(--accent)' : '1px solid rgba(20,22,26,.1)',
-        background: active ? 'var(--accent)' : 'rgba(255,255,255,.5)',
-        color: active ? '#fff' : 'var(--ink-soft)',
+        border: active ? '2px solid #7A4A12' : '2px solid #9A6A3A',
+        background: active ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)',
+        color: active ? '#4A2E10' : '#6E4423',
+        boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'inset 0 1px 0 rgba(255,255,255,.5)',
         cursor: 'pointer',
         fontFamily: 'inherit',
         whiteSpace: 'nowrap',
@@ -34,11 +35,12 @@ export function Tag({ children }: { children: React.ReactNode }) {
       style={{
         display: 'inline-block',
         fontSize: 12,
-        padding: '3px 10px',
+        fontWeight: 700,
+        padding: '3px 11px',
         borderRadius: 999,
-        background: 'var(--accent-tint)',
-        color: 'var(--accent)',
-        fontWeight: 500,
+        background: 'rgba(120,80,30,.16)',
+        border: '1.5px solid rgba(120,80,30,.35)',
+        color: '#7A4A12',
       }}
     >
       {children}

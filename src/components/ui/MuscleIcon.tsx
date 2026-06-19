@@ -25,16 +25,18 @@ export function MuscleIconBadge({ group, size = 38 }: { group: MuscleGroup; size
       style={{
         width: size,
         height: size,
-        borderRadius: Math.round(size * 0.34),
-        background: color + '1f',
+        borderRadius: Math.round(size * 0.32),
+        background: 'linear-gradient(180deg,#F7E8C6,#EAD3A2)',
+        border: '2.5px solid #8A5A2A',
         color,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flex: 'none',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), 0 2px 0 #6E4423',
       }}
     >
-      <Icon size={Math.round(size * 0.52)} />
+      <Icon size={Math.round(size * 0.5)} strokeWidth={2.6} />
     </span>
   )
 }

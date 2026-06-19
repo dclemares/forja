@@ -37,4 +37,4 @@ export function HistoryScreen() {
   )
 }
 
-const pill: React.CSSProperties = { display: 'inline-block', fontSize: 12, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,.6)', border: '1px solid rgba(20,22,26,.1)', color: 'var(--ink-soft)' }
+const pill: React.CSSProperties = { display: 'inline-block', fontSize: 12, fontWeight: 700, padding: '3px 11px', borderRadius: 999, background: 'rgba(120,80,30,.14)', border: '1.5px solid rgba(120,80,30,.35)', color: '#7A4A12' }

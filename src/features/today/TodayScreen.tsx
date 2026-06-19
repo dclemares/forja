@@ -44,7 +44,7 @@ export function TodayScreen() {
           <h1 style={{ margin: '2px 0 0', fontSize: 26, fontWeight: 600, letterSpacing: '-0.5px' }}>Entrenar</h1>
         </div>
         {session && (
-          <button aria-label="Perfil" onClick={() => setProfileOpen(true)} style={{ width: 44, height: 44, borderRadius: 999, border: '1px solid rgba(20,22,26,.1)', background: 'rgba(255,255,255,.6)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 'none' }}>
+          <button aria-label="Perfil" onClick={() => setProfileOpen(true)} style={{ width: 46, height: 46, borderRadius: 999, border: '2.5px solid #4A2E16', background: 'linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 'none', boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), 0 3px 0 #34200E' }}>
             <User size={20} />
           </button>
         )}
@@ -205,7 +205,7 @@ function BodyweightSheet({ open, onClose, onSave }: { open: boolean; onClose: ()
           inputMode="decimal"
           value={val}
           onChange={(e) => setVal(e.target.value)}
-          style={{ width: '100%', fontSize: 22, fontWeight: 600, textAlign: 'center', padding: '14px', borderRadius: 16, border: '1px solid rgba(20,22,26,.12)', background: 'rgba(255,255,255,.6)', fontFamily: 'inherit', marginBottom: 12 }}
+          style={{ width: '100%', fontSize: 22, fontWeight: 700, textAlign: 'center', padding: '14px', borderRadius: 14, border: '2px solid #9A6A3A', background: 'rgba(120,80,30,.1)', color: 'var(--ink)', fontFamily: 'inherit', marginBottom: 12, outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }}
         />
         <PillButton full size="lg" onClick={() => { const n = parseFloat(val.replace(',', '.')); if (Number.isFinite(n)) onSave(n) }}>
           Guardar

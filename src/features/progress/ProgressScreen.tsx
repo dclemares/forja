@@ -60,10 +60,10 @@ export function ProgressScreen() {
 
 function SegBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 13, padding: 8, borderRadius: 11, border: active ? '1px solid rgba(20,22,26,.1)' : '1px solid transparent', background: active ? 'rgba(255,255,255,.85)' : 'transparent', color: active ? 'var(--accent)' : 'var(--ink-soft)', fontWeight: active ? 600 : 400, cursor: 'pointer', fontFamily: 'inherit' }}>
+    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 13, padding: 8, borderRadius: 10, border: active ? '2px solid #7A4A12' : '2px solid transparent', background: active ? 'linear-gradient(180deg,#FBD269,#E0922C)' : 'transparent', color: active ? '#4A2E10' : '#6E4423', fontWeight: 700, boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
       {children}
     </button>
   )
 }
 
-const seg: React.CSSProperties = { display: 'flex', background: 'rgba(255,255,255,.45)', border: '1px solid rgba(20,22,26,.08)', borderRadius: 13, padding: 3, marginBottom: 12 }
+const seg: React.CSSProperties = { display: 'flex', background: 'rgba(120,80,30,.16)', border: '2px solid #9A6A3A', borderRadius: 13, padding: 3, marginBottom: 12, boxShadow: 'inset 0 2px 4px rgba(80,50,20,.25)' }

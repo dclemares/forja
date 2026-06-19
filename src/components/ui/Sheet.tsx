@@ -51,7 +51,7 @@ const scrim: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 50,
-  background: 'rgba(20,22,40,.28)',
+  background: 'rgba(40,24,10,.5)',
   backdropFilter: 'blur(2px)',
   WebkitBackdropFilter: 'blur(2px)',
   display: 'flex',
@@ -62,17 +62,16 @@ const sheet: React.CSSProperties = {
   width: '100%',
   maxWidth: 480,
   maxHeight: '85vh',
-  borderRadius: '28px 28px 0 0',
+  borderRadius: '24px 24px 0 0',
   padding: '10px 16px max(16px, env(safe-area-inset-bottom))',
-  background: 'var(--glass-strong)',
   display: 'flex',
   flexDirection: 'column',
 }
 const grabber: React.CSSProperties = {
-  width: 40,
-  height: 4,
+  width: 44,
+  height: 5,
   borderRadius: 999,
-  background: 'rgba(20,22,26,.18)',
+  background: 'rgba(110,68,35,.4)',
   margin: '0 auto 12px',
 }
 const head: React.CSSProperties = {

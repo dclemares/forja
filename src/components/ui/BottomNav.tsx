@@ -12,11 +12,11 @@ const tabs: { to: string; label: string; icon: ReactNode }[] = [
 export function BottomNav() {
   const navigate = useNavigate()
   return (
-    <nav className="glass" style={navStyle}>
+    <nav style={navStyle}>
       <Tab tab={tabs[0]} />
       <Tab tab={tabs[1]} />
       <button aria-label="Entrenar" style={fab} onClick={() => navigate('/')}>
-        <Play size={24} fill="#fff" />
+        <Play size={24} fill="#4A2E10" color="#4A2E10" />
       </button>
       <Tab tab={tabs[2]} />
       <Tab tab={tabs[3]} />
@@ -30,11 +30,9 @@ function Tab({ tab }: { tab: { to: string; label: string; icon: ReactNode } }) {
       {({ isActive }) => (
         <div style={itemWrap}>
           <span style={{ ...indicator, ...(isActive ? indicatorOn : null) }}>
-            <span style={{ color: isActive ? 'var(--accent)' : 'var(--ink-faint)' }}>{tab.icon}</span>
+            <span style={{ color: isActive ? '#4A2E10' : '#EAD4A6', display: 'flex' }}>{tab.icon}</span>
           </span>
-          <span style={{ fontSize: 11, color: isActive ? 'var(--accent)' : 'var(--ink-faint)', fontWeight: isActive ? 600 : 400 }}>
-            {tab.label}
-          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#FFE3A6' : '#D8BE8E' }}>{tab.label}</span>
         </div>
       )}
     </NavLink>
@@ -51,12 +49,12 @@ const navStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-around',
-  padding: '8px 6px',
-  borderRadius: 26,
+  padding: '8px 8px 10px',
+  borderRadius: 22,
   zIndex: 30,
-  background: 'rgba(255,255,255,0.92)',
-  border: '1px solid rgba(255,255,255,0.95)',
-  boxShadow: '0 8px 28px rgba(40,45,90,0.20)',
+  background: 'linear-gradient(180deg,#A06A35,#7E5026)',
+  border: '3px solid #4A2E16',
+  boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), inset 0 -5px 10px rgba(40,24,10,.45), 0 5px 0 #34200E, 0 9px 16px rgba(20,12,4,.5)',
 }
 const itemWrap: React.CSSProperties = {
   display: 'flex',
@@ -66,27 +64,30 @@ const itemWrap: React.CSSProperties = {
   padding: '2px 0',
 }
 const indicator: React.CSSProperties = {
-  width: 54,
+  width: 50,
   height: 30,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: 16,
-  transition: 'background .25s',
+  borderRadius: 11,
+  transition: 'background .2s',
 }
-const indicatorOn: React.CSSProperties = { background: 'var(--accent-tint)' }
+const indicatorOn: React.CSSProperties = {
+  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
+  border: '2px solid #7A4A12',
+  boxShadow: 'inset 0 1px 0 rgba(255,240,200,.7)',
+}
 const fab: React.CSSProperties = {
-  width: 58,
+  width: 60,
   height: 50,
   flex: 'none',
-  borderRadius: 18,
-  border: 'none',
-  background: 'var(--accent)',
-  color: '#fff',
+  borderRadius: 16,
+  border: '2.5px solid #7A4A12',
+  background: 'linear-gradient(180deg,#FBD269,#E0922C)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  boxShadow: '0 8px 20px rgba(70,97,242,.45)',
-  marginTop: -2,
+  marginTop: -6,
+  boxShadow: 'inset 0 2px 0 rgba(255,240,200,.75), 0 4px 0 #A66A18, 0 7px 10px rgba(20,12,4,.45)',
 }

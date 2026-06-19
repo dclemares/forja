@@ -5,7 +5,7 @@ export interface Point {
   value: number
 }
 
-const ACCENT = '#4661F2'
+const ACCENT = '#C8861F'
 
 /** Línea (volumen total por sesión, etc.). Animada al montar. */
 export function LineChart({ data, height = 130 }: { data: Point[]; height?: number }) {
@@ -61,7 +61,7 @@ export function VBars({ data, height = 120 }: { data: Point[]; height?: number }
                 width: '100%',
                 height: `${Math.max(4, (d.value / max) * (height - 22))}px`,
                 borderRadius: '6px 6px 0 0',
-                background: last ? ACCENT : 'rgba(70,97,242,.28)',
+                background: last ? ACCENT : 'rgba(200,134,31,.32)',
                 animationDelay: `${i * 60}ms`,
               }}
             />
@@ -85,7 +85,7 @@ export function HBars({ data }: { data: Point[] }) {
             <span>{d.label}</span>
             <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{formatNumber(d.value)}</span>
           </div>
-          <div style={{ height: 9, background: 'rgba(20,22,26,.07)', borderRadius: 6, overflow: 'hidden' }}>
+          <div style={{ height: 9, background: 'rgba(120,80,30,.16)', borderRadius: 6, overflow: 'hidden' }}>
             <div className="chart-bar" style={{ height: '100%', width: `${(d.value / max) * 100}%`, background: ACCENT, borderRadius: 6, transformOrigin: 'left' }} />
           </div>
         </div>
@@ -112,7 +112,7 @@ export function BodyChart({ data, height = 130 }: { data: { date: string; weight
 
   return (
     <svg viewBox={`0 0 ${W} ${height}`} width="100%" height={height} role="img" aria-label="Peso corporal">
-      <polyline points={line('weight')} fill="none" stroke="rgba(70,97,242,.35)" strokeWidth={2} strokeLinejoin="round" />
+      <polyline points={line('weight')} fill="none" stroke="rgba(200,134,31,.4)" strokeWidth={2} strokeLinejoin="round" />
       {data.length > 1 && (
         <polyline className="chart-line" points={line('avg')} fill="none" stroke={ACCENT} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       )}

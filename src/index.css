@@ -1,33 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-accent: #4661F2;
-  --color-accent-strong: #3550E0;
-  --color-ink: #14161A;
-  --color-bg: #E9ECF2;
-  --color-danger: #C5403F;
-
-  --radius-control: 18px;
-  --radius-card: 24px;
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-accent: #BE7A14;
+  --color-ink: #3A2410;
+  --color-bg: #A8804A;
+  --radius-control: 14px;
+  --radius-card: 18px;
+  --font-sans: 'Baloo 2', ui-rounded, system-ui, sans-serif;
 }
 
 :root {
-  --accent: #4661F2;
-  --accent-strong: #3550E0;
-  --accent-tint: rgba(70, 97, 242, 0.12);
-  --accent-soft: rgba(70, 97, 242, 0.2);
-  --ink: #14161A;
-  --ink-soft: rgba(20, 22, 26, 0.62);
-  --ink-faint: rgba(20, 22, 26, 0.42);
-  --bg: #E9ECF2;
-  --glass: rgba(255, 255, 255, 0.55);
-  --glass-strong: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --hairline: rgba(20, 22, 26, 0.08);
-  --danger: #C5403F;
-  --danger-tint: rgba(197, 64, 63, 0.12);
+  /* Acento dorado */
+  --accent: #BE7A14;
+  --accent-strong: #9A5E10;
+  --accent-tint: rgba(239, 168, 56, 0.22);
+  --accent-soft: rgba(239, 168, 56, 0.45);
+  /* Madera */
+  --wood-dark: #4A2E16;
+  --wood-edge: #6E4423;
+  --wood-top: #A06A35;
+  --wood-bot: #7E5026;
+  /* Oro botón */
+  --gold-top: #FBD269;
+  --gold: #EFA838;
+  --gold-bot: #E0922C;
+  --gold-edge: #7A4A12;
+  --gold-3d: #A66A18;
+  /* Pergamino (interior de tarjetas) */
+  --parch-top: #F4E3BE;
+  --parch-bot: #E7D0A0;
+  /* Texto */
+  --ink: #3A2410;
+  --ink-soft: rgba(58, 36, 16, 0.66);
+  --ink-faint: rgba(58, 36, 16, 0.42);
+  --cream: #FBEFD3;
+  --hairline: rgba(110, 68, 35, 0.22);
+  --bg: #A8804A;
 }
 
 * { box-sizing: border-box; }
@@ -38,6 +46,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -47,7 +56,8 @@ body {
 input, button, textarea, select { font-family: inherit; }
 button { cursor: pointer; }
 
-/* App is mobile-only: constrain to a phone column on larger viewports */
+h1, h2, h3 { font-weight: 700; }
+
 #root {
   max-width: 480px;
   margin: 0 auto;
@@ -56,32 +66,46 @@ button { cursor: pointer; }
   isolation: isolate;
 }
 
-/* ---- Glassmorphism ---- */
+/* ---- Panel cartoon (pergamino con marco de madera) ---- */
 .glass {
   position: relative;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, var(--parch-top), var(--parch-bot));
+  border: 3px solid var(--wood-edge);
   border-radius: var(--radius-card);
-  backdrop-filter: blur(18px) saturate(1.1);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
-  box-shadow: 0 10px 30px rgba(40, 45, 90, 0.12);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.45),
+    inset 0 -6px 12px rgba(150, 110, 60, 0.22),
+    0 5px 0 var(--wood-dark),
+    0 9px 16px rgba(30, 18, 6, 0.4);
   overflow: hidden;
+  color: var(--ink);
 }
 .glass-sheen::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(120deg, transparent 32%, rgba(255, 255, 255, 0.6) 50%, transparent 68%);
+  background: linear-gradient(120deg, transparent 34%, rgba(255, 255, 255, 0.35) 50%, transparent 66%);
   background-size: 230% 100%;
-  animation: sheen 6.5s linear infinite;
+  animation: sheen 7s linear infinite;
   pointer-events: none;
+}
+
+/* ---- Tablón de madera (cabeceras, barra) ---- */
+.wood {
+  background: linear-gradient(180deg, var(--wood-top), var(--wood-bot));
+  border: 3px solid var(--wood-dark);
+  border-radius: var(--radius-card);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 210, 140, 0.35),
+    inset 0 -6px 12px rgba(40, 24, 10, 0.45),
+    0 5px 0 #34200E,
+    0 9px 16px rgba(20, 12, 4, 0.45);
+  color: var(--cream);
 }
 
 /* ---- Keyframes ---- */
 @keyframes sheen { 0% { background-position: 210% 0; } 100% { background-position: -110% 0; } }
-@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-6%, -5%) scale(1.12); } }
-@keyframes drift2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(7%, 6%) scale(1.15); } }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
@@ -107,5 +131,4 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
-/* Remove tap highlight on mobile */
 a, button, [role="button"] { -webkit-tap-highlight-color: transparent; }
