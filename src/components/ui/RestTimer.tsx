@@ -104,16 +104,16 @@ const chip = (active: boolean): React.CSSProperties => ({
 })
 const startBtn: React.CSSProperties = {
   width: '100%',
-  border: '2px solid #4A2E16',
+  border: '2px solid #9A6A3A',
   borderRadius: 12,
-  padding: '11px',
-  fontSize: 15,
+  padding: '10px',
+  fontSize: 14,
   fontWeight: 800,
   fontFamily: 'inherit',
   cursor: 'pointer',
-  color: '#FBEFD3',
-  background: 'linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 48%), linear-gradient(180deg,#A06A35,#7E5026)',
-  boxShadow: 'inset 0 1px 0 rgba(255,210,140,.35), 0 3px 0 #34200E',
+  color: '#5A3A18',
+  background: 'linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 50%), linear-gradient(180deg,#F0E2C0,#E3CE9E)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), 0 3px 0 #BC9C68',
 }
 const runBtn: React.CSSProperties = {
   position: 'relative',

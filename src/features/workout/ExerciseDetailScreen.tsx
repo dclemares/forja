@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftRight, ChartLine, ClipboardList, History as HistoryIcon, MoreVertical, Plus, Table, Trash2, Trophy, X } from 'lucide-react'
+import { ArrowLeftRight, ChartLine, ClipboardList, History as HistoryIcon, MoreVertical, Plus, SlidersHorizontal, Table, Trash2, Trophy, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
+import { CoinBadge } from '@/components/ui/CoinBadge'
 import { PillButton } from '@/components/ui/PillButton'
 import { AppBar, iconBtn } from '@/components/ui/AppBar'
 import { Tag } from '@/components/ui/Chip'
@@ -85,7 +86,7 @@ export function ExerciseDetailScreen() {
       <GlassCard style={{ padding: 15, marginBottom: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <span style={hint}><HistoryIcon size={13} /> Prerellenado con tu última vez</span>
-          <button type="button" onClick={cycleStep} style={stepPill} aria-label="Cambiar paso de peso">Paso {fmtKg(wstep)}</button>
+          <button type="button" onClick={cycleStep} style={stepPill} aria-label="Cambiar paso de peso"><SlidersHorizontal size={12} /> Paso {fmtKg(wstep)}</button>
         </div>
         {hasSets && (
           <div style={{ ...gridHead }}>
@@ -111,7 +112,7 @@ export function ExerciseDetailScreen() {
           </div>
         ))}
         {!hasSets && <div style={{ color: 'var(--ink-faint)', fontSize: 14, textAlign: 'center', padding: '14px 2px 4px' }}>Aún no hay series. Pulsa “Añadir serie”.</div>}
-        <PillButton full variant="tonal" icon={<Plus size={16} />} style={{ marginTop: 12 }} onClick={() => addSet(id, weId)}>
+        <PillButton full variant="primary" icon={<Plus size={16} />} style={{ marginTop: 12 }} onClick={() => addSet(id, weId)}>
           Añadir serie
         </PillButton>
         {(pr.weight || pr.volume) && (
@@ -122,14 +123,14 @@ export function ExerciseDetailScreen() {
         )}
         <div style={volRow}>
           <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Volumen de hoy</span>
-          <span><b style={{ fontSize: 20, fontWeight: 600, color: 'var(--accent)' }}>{formatNumber(exerciseVolume(we))}</b> <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>kg</span></span>
+          <CoinBadge>{formatNumber(exerciseVolume(we))} kg</CoinBadge>
         </div>
       </GlassCard>
 
       {hasSets && <RestTimer trigger={we.sets.length} />}
 
       <SectionTitle icon={<Table size={16} />}>Histórico de semanas anteriores</SectionTitle>
-      <GlassCard style={{ padding: 15, marginBottom: 4 }}>
+      <GlassCard flat style={{ padding: 15, marginBottom: 4 }}>
         {history.length ? (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <tbody>
@@ -152,7 +153,7 @@ export function ExerciseDetailScreen() {
 
       <SectionTitle icon={<ChartLine size={16} />}>Volumen total del ejercicio</SectionTitle>
       {hasChartData ? (
-        <GlassCard style={{ padding: 15 }}>
+        <GlassCard flat style={{ padding: 15 }}>
           <LineChart data={chartData} />
           {history.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 6 }}>
@@ -161,7 +162,7 @@ export function ExerciseDetailScreen() {
           )}
         </GlassCard>
       ) : (
-        <GlassCard style={{ padding: '16px 15px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
+        <GlassCard flat style={{ padding: '16px 15px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
           Registra alguna serie para empezar a ver tu evolución.
         </GlassCard>
       )}
@@ -240,7 +241,7 @@ function SectionTitle({ icon, children }: { icon: React.ReactNode; children: Rea
 const hint: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent-tint)', color: 'var(--accent)', fontSize: 11, padding: '5px 11px', borderRadius: 13, marginBottom: 4 }
 const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 11, padding: '0 2px' }
 const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, alignItems: 'center' }
-const stepPill: React.CSSProperties = { border: '2px solid #7A4A12', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: '#4A2E10', background: 'linear-gradient(180deg,#F0E2C0,#E3CE9E)', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.5)', flex: 'none' }
+const stepPill: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 4, border: '1.5px solid var(--hairline)', borderRadius: 999, padding: '3px 10px', fontSize: 12, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', color: 'var(--ink-soft)', background: 'rgba(120,80,30,.06)', flex: 'none' }
 const metaRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', width: '100%', padding: '5px 2px 0 24px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, textAlign: 'left' }
 const rpeChip: React.CSSProperties = { background: 'var(--accent-tint)', color: 'var(--accent)', fontWeight: 800, fontSize: 11, padding: '2px 8px', borderRadius: 999 }
 const noteTxt: React.CSSProperties = { color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }
