@@ -87,20 +87,20 @@ const card: React.CSSProperties = {
   border: '2.5px solid #8A5A2A',
   borderRadius: 14,
   padding: 13,
-  marginBottom: 4,
+  marginBottom: 14,
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 #6E4423',
 }
 const chip = (active: boolean): React.CSSProperties => ({
-  border: '2px solid #6E4220',
+  border: '2px solid #7A4A12',
   borderRadius: 999,
   padding: '3px 10px',
   fontSize: 12,
   fontWeight: 800,
   fontFamily: 'inherit',
   cursor: 'pointer',
-  color: active ? '#FBEFD3' : '#7A4A1E',
-  background: active ? 'linear-gradient(180deg,#C58A4C,#9C5F2A)' : 'linear-gradient(180deg,#E8D0A6,#D7B486)',
-  boxShadow: active ? 'inset 0 1px 0 rgba(255,225,180,.45)' : 'inset 0 1px 0 rgba(255,255,255,.5)',
+  color: active ? '#4A2E10' : '#6E4423',
+  background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'linear-gradient(180deg,#F0E2C0,#E3CE9E)',
+  boxShadow: active ? 'inset 0 1px 0 rgba(255,245,210,.7)' : 'none',
 })
 const startBtn: React.CSSProperties = {
   width: '100%',
