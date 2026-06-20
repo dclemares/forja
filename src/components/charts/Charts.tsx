@@ -33,9 +33,16 @@ export function LineChart({ data, height = 138 }: { data: Point[]; height?: numb
 
   const pts = data.map((d, i) => `${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ')
   const showValues = data.length <= 8
+  const baseY = height - padBottom + 4
 
   return (
     <svg viewBox={`0 0 ${W} ${height}`} width="100%" height={height} role="img" aria-label="Gráfica de evolución">
+      {/* Línea base (eje) para dar contexto. */}
+      <line x1={padX} y1={baseY} x2={W - padX} y2={baseY} stroke="rgba(120,80,30,.2)" strokeWidth={1} />
+      {/* Con un único dato, guía horizontal para que no quede un punto suelto. */}
+      {data.length === 1 && (
+        <line x1={padX} y1={y(data[0].value)} x2={W - padX} y2={y(data[0].value)} stroke="rgba(200,134,31,.35)" strokeWidth={1.5} strokeDasharray="4 4" />
+      )}
       {data.length > 1 && (
         <polyline className="chart-line" points={pts} fill="none" stroke={ACCENT} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       )}
@@ -126,6 +133,9 @@ export function BodyChart({ data, height = 130 }: { data: { date: string; weight
 
   return (
     <svg viewBox={`0 0 ${W} ${height}`} width="100%" height={height} role="img" aria-label="Peso corporal">
+      {data.length === 1 && (
+        <line x1={padX} y1={y(lastWeight)} x2={W - padX} y2={y(lastWeight)} stroke="rgba(200,134,31,.35)" strokeWidth={1.5} strokeDasharray="4 4" />
+      )}
       <polyline points={line('weight')} fill="none" stroke="rgba(200,134,31,.4)" strokeWidth={2} strokeLinejoin="round" />
       {data.length > 1 && (
         <polyline className="chart-line" points={line('avg')} fill="none" stroke={ACCENT} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />

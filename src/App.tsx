@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatedBackground } from './components/ui/AnimatedBackground'
 import { BottomNav } from './components/ui/BottomNav'
+import { UpdatePrompt } from './components/ui/UpdatePrompt'
 import { TodayScreen } from './features/today/TodayScreen'
 import { SessionsScreen } from './features/sessions/SessionsScreen'
 import { SessionDetailScreen } from './features/sessions/SessionDetailScreen'
@@ -25,6 +26,7 @@ function RootLayout() {
         </main>
         {!fullscreen && <BottomNav />}
       </div>
+      <UpdatePrompt />
     </>
   )
 }

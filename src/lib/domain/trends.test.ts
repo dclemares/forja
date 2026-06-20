@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isoWeekKey, movingAverage, weeklyVolume, bodyweightTrend } from './trends'
+import { isoWeekKey, movingAverage, weeklyVolume, bodyweightTrend, weeklyStreak } from './trends'
 import type { Workout } from '@/lib/types'
 
 const w = (date: string, vol: number): Workout => ({
@@ -10,6 +10,7 @@ const w = (date: string, vol: number): Workout => ({
   createdAt: date,
   exercises: [{ id: 'a', exerciseId: 'e', name: 'n', muscleGroup: 'Pecho', sets: [{ id: '1', weight: vol, reps: 1 }] }],
 })
+const fw = (date: string): Workout => ({ ...w(date, 1), finishedAt: `${date}T10:00:00Z` })
 
 describe('trends', () => {
   it('isoWeekKey agrupa por semana ISO', () => {
@@ -35,5 +36,22 @@ describe('trends', () => {
     ])
     expect(pts.map((p) => p.weight)).toEqual([78, 80])
     expect(pts[1].avg).toBe(79)
+  })
+
+  it('weeklyStreak cuenta semanas consecutivas', () => {
+    // Semanas ISO: 19→sem actual, 12→anterior, 05→la previa.
+    expect(weeklyStreak([fw('2026-06-19'), fw('2026-06-12'), fw('2026-06-05')], '2026-06-19')).toBe(3)
+  })
+
+  it('weeklyStreak da gracia a la semana en curso vacía', () => {
+    expect(weeklyStreak([fw('2026-06-12'), fw('2026-06-05')], '2026-06-19')).toBe(2)
+  })
+
+  it('weeklyStreak se rompe con un hueco', () => {
+    expect(weeklyStreak([fw('2026-06-19'), fw('2026-06-05')], '2026-06-19')).toBe(1)
+  })
+
+  it('weeklyStreak ignora entrenos sin finalizar', () => {
+    expect(weeklyStreak([w('2026-06-19', 1)], '2026-06-19')).toBe(0)
   })
 })

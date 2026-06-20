@@ -39,6 +39,24 @@ export function weeklyVolume(workouts: Workout[]): WeekPoint[] {
     .map(([key, volume]) => ({ key, volume, label: 'S' + key.split('W')[1] }))
 }
 
+/** Racha de semanas ISO consecutivas con al menos un entreno finalizado.
+ *  Gracia: si la semana actual aún no tiene entreno, no rompe la racha. */
+export function weeklyStreak(workouts: Workout[], todayIso: string): number {
+  const weeks = new Set(workouts.filter((w) => w.finishedAt).map((w) => isoWeekKey(w.date)))
+  if (weeks.size === 0) return 0
+  const [y, m, d] = todayIso.split('-').map(Number)
+  const cursor = new Date(y, (m ?? 1) - 1, d ?? 1)
+  const keyOf = (dt: Date) =>
+    isoWeekKey(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`)
+  if (!weeks.has(keyOf(cursor))) cursor.setDate(cursor.getDate() - 7)
+  let count = 0
+  while (weeks.has(keyOf(cursor))) {
+    count++
+    cursor.setDate(cursor.getDate() - 7)
+  }
+  return count
+}
+
 /** Media móvil de ventana `window`. */
 export function movingAverage(values: number[], window: number): number[] {
   return values.map((_, i) => {

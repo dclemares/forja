@@ -8,6 +8,7 @@ import type {
   WeeklyPlan,
   Workout,
   WorkoutExercise,
+  WorkoutSet,
 } from './types'
 import { todayISO, uid } from './format'
 import { buildWorkoutFromSession, buildFreeWorkout, cloneSets, lastSetsForExercise } from './domain/snapshot'
@@ -56,7 +57,7 @@ export interface StoreActions {
   removeWorkoutExercise: (workoutId: string, weId: string) => void
   replaceWorkoutExercise: (workoutId: string, weId: string, ex: Pick<WorkoutExercise, 'exerciseId' | 'name' | 'muscleGroup'>) => void
   addSet: (workoutId: string, weId: string) => void
-  updateSet: (workoutId: string, weId: string, setId: string, patch: Partial<{ weight: number; reps: number }>) => void
+  updateSet: (workoutId: string, weId: string, setId: string, patch: Partial<Pick<WorkoutSet, 'weight' | 'reps' | 'rpe' | 'note'>>) => void
   deleteSet: (workoutId: string, weId: string, setId: string) => void
   // bodyweight
   addBodyweight: (date: string, weight: number) => void

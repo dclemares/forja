@@ -79,3 +79,9 @@ export function playSuccess() {
   if (!enabled) return
   ;[523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.1, 0.22, 'triangle', 0.09))
 }
+
+/** Campana suave: fin del descanso. */
+export function playRestDone() {
+  if (!enabled) return
+  ;[784, 1047].forEach((f, i) => tone(f, i * 0.14, 0.32, 'sine', 0.1))
+}

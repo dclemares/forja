@@ -8,6 +8,7 @@ import { PillButton } from '@/components/ui/PillButton'
 import { AppBar } from '@/components/ui/AppBar'
 import { Sheet } from '@/components/ui/Sheet'
 import { DAY_LABELS } from '@/lib/format'
+import { sessionColor } from '@/lib/sessionColor'
 
 export function SessionsScreen() {
   const { state, addSession, setDayPlan } = useStore()
@@ -24,6 +25,8 @@ export function SessionsScreen() {
     navigate(`/sessions/${s.id}`)
   }
 
+  const plannedDays = DAY_LABELS.filter((_, i) => state.weeklyPlan[i]).length
+
   return (
     <div className="anim-rise">
       <AppBar title="Sesiones" large right={<PillButton icon={<Plus size={16} />} onClick={() => setNewOpen(true)}>Nueva</PillButton>} />
@@ -33,24 +36,37 @@ export function SessionsScreen() {
         <div style={{ display: 'flex', gap: 5 }}>
           {DAY_LABELS.map((d, i) => {
             const s = state.sessions.find((x) => x.id === state.weeklyPlan[i])
+            const col = s ? sessionColor(s.id) : null
             return (
-              <button key={i} title={s ? s.name : 'Descanso'} style={dayCell} onClick={() => setDayEdit(i)}>
+              <button key={i} title={s ? s.name : 'Descanso'} style={{ ...dayCell, ...(col ? { borderColor: col, background: `${col}1A` } : {}) }} onClick={() => setDayEdit(i)}>
                 <span style={{ color: 'var(--ink-soft)', fontWeight: 700 }}>{d[0]}</span>
-                <b style={{ fontSize: 10, fontWeight: 700, color: s ? 'var(--accent)' : 'var(--ink-faint)', marginTop: 3 }}>
+                <b style={{ fontSize: 10, fontWeight: 800, color: col ?? 'var(--ink-faint)', marginTop: 3 }}>
                   {s ? abbrev(s.name) : 'Desc'}
                 </b>
               </button>
             )
           })}
         </div>
+        {state.sessions.length > 0 && (
+          <div style={summaryStrip}>
+            <span><b style={{ color: 'var(--ink)' }}>{state.sessions.length}</b> {state.sessions.length === 1 ? 'sesión' : 'sesiones'}</span>
+            <span style={dot} />
+            <span><b style={{ color: 'var(--ink)' }}>{plannedDays}</b> de entreno</span>
+            <span style={dot} />
+            <span><b style={{ color: 'var(--ink)' }}>{7 - plannedDays}</b> descanso</span>
+          </div>
+        )}
       </GlassCard>
 
       {state.sessions.map((s) => (
         <GlassCard key={s.id} style={{ padding: 15, marginBottom: 11, cursor: 'pointer' }} onClick={() => navigate(`/sessions/${s.id}`)}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontWeight: 600 }}>{s.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{s.exerciseIds.length} ejercicios</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+              <span style={{ width: 12, height: 12, borderRadius: 4, background: sessionColor(s.id), border: '2px solid rgba(40,20,5,.2)', flex: 'none' }} />
+              <div>
+                <div style={{ fontWeight: 600 }}>{s.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{s.exerciseIds.length} ejercicios</div>
+              </div>
             </div>
             <ChevronRight size={18} color="var(--ink-faint)" />
           </div>
@@ -87,5 +103,7 @@ const abbrev = (n: string) => {
 const fullDay = (i: number) => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][i]
 
 const dayCell: React.CSSProperties = { flex: 1, textAlign: 'center', background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', border: '2px solid #9A6A3A', borderRadius: 11, padding: '8px 1px', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)' }
+const summaryStrip: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 11, borderTop: '1px solid var(--hairline)', fontSize: 12, color: 'var(--ink-soft)', fontWeight: 600 }
+const dot: React.CSSProperties = { width: 3, height: 3, borderRadius: 999, background: 'var(--ink-faint)', flex: 'none' }
 const inputStyle: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const rowBtn: React.CSSProperties = { display: 'block', width: '100%', padding: '13px 6px', background: 'none', border: 'none', borderBottom: '1px solid rgba(20,22,26,.07)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--ink)', textAlign: 'left' }

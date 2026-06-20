@@ -10,6 +10,7 @@ import { Stepper } from '@/components/ui/Stepper'
 import { Sheet } from '@/components/ui/Sheet'
 import { exerciseVolume, workoutVolume } from '@/lib/domain/volume'
 import { formatLongDate, formatNumber } from '@/lib/format'
+import { getWeightStep } from '@/lib/prefs'
 
 export function WorkoutDetailScreen() {
   const { id = '' } = useParams()
@@ -43,11 +44,19 @@ export function WorkoutDetailScreen() {
           </div>
           <div style={gridHead}><span /><span style={{ textAlign: 'center' }}>Peso (kg)</span><span style={{ textAlign: 'center' }}>Reps</span><span /></div>
           {we.sets.map((s, i) => (
-            <div key={s.id} style={row}>
-              <span style={sn}>{i + 1}</span>
-              <Stepper kind="weight" step={2.5} value={s.weight} ariaLabel="peso" onChange={(v) => updateSet(workout.id, we.id, s.id, { weight: v })} />
-              <Stepper kind="reps" step={1} value={s.reps} ariaLabel="reps" onChange={(v) => updateSet(workout.id, we.id, s.id, { reps: v })} />
-              <button aria-label="Borrar serie" style={delBtn} onClick={() => deleteSet(workout.id, we.id, s.id)}><X size={16} /></button>
+            <div key={s.id} style={{ marginTop: 9 }}>
+              <div style={row}>
+                <span style={sn}>{i + 1}</span>
+                <Stepper kind="weight" step={getWeightStep()} value={s.weight} ariaLabel="peso" onChange={(v) => updateSet(workout.id, we.id, s.id, { weight: v })} />
+                <Stepper kind="reps" step={1} value={s.reps} ariaLabel="reps" onChange={(v) => updateSet(workout.id, we.id, s.id, { reps: v })} />
+                <button aria-label="Borrar serie" style={delBtn} onClick={() => deleteSet(workout.id, we.id, s.id)}><X size={16} /></button>
+              </div>
+              {(s.rpe != null || s.note) && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '4px 2px 0 24px', fontSize: 12 }}>
+                  {s.rpe != null && <span style={{ background: 'var(--accent-tint)', color: 'var(--accent)', fontWeight: 800, fontSize: 11, padding: '2px 8px', borderRadius: 999 }}>RPE {s.rpe}</span>}
+                  {s.note ? <span style={{ color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.note}</span> : null}
+                </div>
+              )}
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 11 }}>
@@ -69,6 +78,6 @@ export function WorkoutDetailScreen() {
 }
 
 const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 8, padding: '0 2px' }
-const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, alignItems: 'center', marginTop: 9 }
+const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, alignItems: 'center' }
 const sn: React.CSSProperties = { textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14, fontWeight: 500 }
 const delBtn: React.CSSProperties = { width: 40, height: 40, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }

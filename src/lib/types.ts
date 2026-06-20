@@ -33,6 +33,10 @@ export interface WorkoutSet {
   id: string
   weight: number
   reps: number
+  /** Esfuerzo percibido (RPE 6–10), opcional. */
+  rpe?: number
+  /** Nota libre de la serie, opcional. */
+  note?: string
 }
 
 /** Copia independiente del ejercicio dentro de un entreno (con snapshot). */

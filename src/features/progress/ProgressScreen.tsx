@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import { LineChart as LineIcon } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { AppBar } from '@/components/ui/AppBar'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { VBars, HBars, BodyChart } from '@/components/charts/Charts'
-import { volumeByMuscleGroup } from '@/lib/domain/volume'
-import { bodyweightTrend, isoWeekKey, weeklyVolume } from '@/lib/domain/trends'
-import { todayISO } from '@/lib/format'
+import { volumeByMuscleGroup, workoutVolume } from '@/lib/domain/volume'
+import { bodyweightTrend, isoWeekKey, weeklyStreak, weeklyVolume } from '@/lib/domain/trends'
+import { formatNumber, todayISO } from '@/lib/format'
 
 type View = 'volumen' | 'grupos' | 'peso'
 
@@ -20,10 +22,29 @@ export function ProgressScreen() {
   const hbars = Object.entries(byMuscle).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value)
   const body = bodyweightTrend(state.bodyweight)
   const lastBody = body[body.length - 1]
+  const totalVolume = finished.reduce((a, w) => a + workoutVolume(w), 0)
+  const streak = weeklyStreak(finished, todayISO())
+
+  if (finished.length === 0 && state.bodyweight.length === 0) {
+    return (
+      <div className="anim-rise">
+        <AppBar title="Progreso" large />
+        <EmptyState icon={<LineIcon size={40} />} title="Aún sin progreso" hint="Completa tu primer entreno y aquí verás tu volumen, grupos y tendencia." />
+      </div>
+    )
+  }
 
   return (
     <div className="anim-rise">
       <AppBar title="Progreso" large />
+
+      <div style={statStrip}>
+        <Stat label="entrenos" value={String(finished.length)} />
+        <span style={vsep} />
+        <Stat label="kg totales" value={formatNumber(totalVolume)} />
+        <span style={vsep} />
+        <Stat label="racha (sem.)" value={String(streak)} />
+      </div>
 
       <div style={seg}>
         <SegBtn active={view === 'volumen'} onClick={() => setView('volumen')}>Volumen</SegBtn>
@@ -66,4 +87,15 @@ function SegBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   )
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ flex: 1, textAlign: 'center' }}>
+      <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.3px' }}>{value}</div>
+      <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 1 }}>{label}</div>
+    </div>
+  )
+}
+
 const seg: React.CSSProperties = { display: 'flex', background: 'rgba(120,80,30,.16)', border: '2px solid #9A6A3A', borderRadius: 13, padding: 3, marginBottom: 12, boxShadow: 'inset 0 2px 4px rgba(80,50,20,.25)' }
+const statStrip: React.CSSProperties = { display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg,#F4E3BE,#E7D0A0)', border: '2.5px solid #8A5A2A', borderRadius: 14, padding: '12px 8px', marginBottom: 12, boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 #6E4423' }
+const vsep: React.CSSProperties = { width: 1, alignSelf: 'stretch', background: 'var(--hairline)', flex: 'none' }

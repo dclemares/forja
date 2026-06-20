@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
+import { Flame, Star, Trophy } from 'lucide-react'
 import { PillButton } from '@/components/ui/PillButton'
 import { CoinBadge } from '@/components/ui/CoinBadge'
 import { formatNumber } from '@/lib/format'
@@ -11,10 +11,12 @@ interface Props {
   volume: number
   exercises: number
   series: number
+  prs?: number
+  streak?: number
   onClose: () => void
 }
 
-export function WorkoutCelebration({ volume, exercises, series, onClose }: Props) {
+export function WorkoutCelebration({ volume, exercises, series, prs = 0, streak = 0, onClose }: Props) {
   useEffect(() => {
     playSuccess()
   }, [])
@@ -49,9 +51,24 @@ export function WorkoutCelebration({ volume, exercises, series, onClose }: Props
         <div style={{ marginTop: 6 }}>
           <CoinBadge size="lg">{formatNumber(volume)} kg</CoinBadge>
         </div>
-        <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 12, marginBottom: 18 }}>
+        <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 12, marginBottom: prs > 0 || streak >= 2 ? 12 : 18 }}>
           {exercises} ejercicios · {series} series
         </div>
+
+        {(prs > 0 || streak >= 2) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+            {prs > 0 && (
+              <div style={highlight}>
+                <Trophy size={16} /> {prs} récord{prs > 1 ? 's' : ''} nuevo{prs > 1 ? 's' : ''}
+              </div>
+            )}
+            {streak >= 2 && (
+              <div style={{ ...highlight, background: 'linear-gradient(180deg,#FFB36B,#F0832B)' }}>
+                <Flame size={16} /> {streak} semanas seguidas
+              </div>
+            )}
+          </div>
+        )}
 
         <PillButton full size="lg" onClick={onClose}>¡Hecho!</PillButton>
       </motion.div>
@@ -86,6 +103,20 @@ const card: React.CSSProperties = {
   maxWidth: 340,
   textAlign: 'center',
   padding: '22px 20px',
+}
+const highlight: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  padding: '8px 12px',
+  borderRadius: 12,
+  fontSize: 14,
+  fontWeight: 800,
+  color: '#4A2E10',
+  background: 'linear-gradient(180deg,#FFE08A,#EDB836)',
+  border: '2px solid #7A4A12',
+  boxShadow: 'inset 0 1px 0 rgba(255,245,210,.7)',
 }
 const banner: React.CSSProperties = {
   display: 'inline-block',

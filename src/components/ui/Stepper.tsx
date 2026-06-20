@@ -12,12 +12,15 @@ interface StepperProps {
 
 /** Número editable (toca y escribe) + botones +/−. Pensado para registro rápido. */
 export function Stepper({ value, onChange, step = 1, kind = 'reps', ariaLabel }: StepperProps) {
-  const display = kind === 'weight' ? formatWeight(value) : String(value)
-  const [text, setText] = useState(display)
+  const fmt = (n: number) => (kind === 'weight' ? formatWeight(n) : String(n))
+  const [text, setText] = useState(() => fmt(value))
+  const [editing, setEditing] = useState(false)
 
+  // No reformatear mientras se escribe (si no, se comería el punto decimal).
   useEffect(() => {
-    setText(kind === 'weight' ? formatWeight(value) : String(value))
-  }, [value, kind])
+    if (!editing) setText(fmt(value))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, kind, editing])
 
   const commit = (raw: string) => {
     const n = parseFloat(raw.replace(',', '.'))
@@ -43,8 +46,14 @@ export function Stepper({ value, onChange, step = 1, kind = 'reps', ariaLabel }:
           setText(e.target.value)
           commit(e.target.value)
         }}
-        onBlur={() => setText(kind === 'weight' ? formatWeight(value) : String(value))}
-        onFocus={(e) => e.currentTarget.select()}
+        onFocus={(e) => {
+          setEditing(true)
+          e.currentTarget.select()
+        }}
+        onBlur={() => {
+          setEditing(false)
+          setText(fmt(value))
+        }}
       />
       <button type="button" style={btn} aria-label="sumar" onClick={() => bump(step)}>
         <Plus size={17} strokeWidth={2.5} />

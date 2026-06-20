@@ -9,6 +9,8 @@ import { MuscleIconBadge } from '@/components/ui/MuscleIcon'
 import { ExercisePicker } from './ExercisePicker'
 import { WorkoutCelebration } from './WorkoutCelebration'
 import { exerciseVolume, formatSetsSummary, workoutSetCount, workoutVolume } from '@/lib/domain/volume'
+import { workoutPRCount } from '@/lib/domain/prs'
+import { weeklyStreak } from '@/lib/domain/trends'
 import { formatNumber } from '@/lib/format'
 
 export function WorkoutScreen() {
@@ -19,6 +21,8 @@ export function WorkoutScreen() {
   const [addOpen, setAddOpen] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [done, setDone] = useState(false)
+  const [prCount, setPrCount] = useState(0)
+  const [streak, setStreak] = useState(0)
 
   useEffect(() => {
     const t = setInterval(() => setElapsed((e) => e + 1), 1000)
@@ -41,6 +45,10 @@ export function WorkoutScreen() {
       navigate('/')
       return
     }
+    // Récords (vs. histórico previo) y racha contando este entreno como hecho.
+    setPrCount(workoutPRCount(workout, state.workouts))
+    const asFinished = state.workouts.map((w) => (w.id === workout.id ? { ...w, finishedAt: new Date().toISOString() } : w))
+    setStreak(weeklyStreak(asFinished, workout.date))
     finishWorkout(workout.id)
     setDone(true)
   }
@@ -105,6 +113,8 @@ export function WorkoutScreen() {
           volume={workoutVolume(workout)}
           exercises={workout.exercises.length}
           series={workoutSetCount(workout)}
+          prs={prCount}
+          streak={streak}
           onClose={() => navigate('/')}
         />
       )}

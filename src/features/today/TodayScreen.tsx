@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronRight, LogOut, Play, Plus, Trash2, TrendingDown, TrendingUp, History as HistoryIcon, User, Volume2, VolumeX } from 'lucide-react'
+import { Activity, CalendarDays, ChevronRight, Flame, LogOut, Play, Plus, Trash2, TrendingDown, TrendingUp, History as HistoryIcon, User, Volume2, VolumeX } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/auth'
 import { GlassCard } from '@/components/ui/GlassCard'
@@ -10,11 +10,11 @@ import { Sheet } from '@/components/ui/Sheet'
 import { titlePlaque } from '@/components/ui/AppBar'
 import { isSoundEnabled, setSoundEnabled, playClick } from '@/lib/sound'
 import { formatLongDate, formatNumber, todayISO } from '@/lib/format'
-import { workoutVolume } from '@/lib/domain/volume'
-import { isoWeekKey, bodyweightTrend } from '@/lib/domain/trends'
+import { workoutVolume, workoutSetCount } from '@/lib/domain/volume'
+import { isoWeekKey, bodyweightTrend, weeklyStreak } from '@/lib/domain/trends'
 
 export function TodayScreen() {
-  const { state, startWorkout, startFreeWorkout, addBodyweight, resetAll } = useStore()
+  const { state, startWorkout, startFreeWorkout, addBodyweight, deleteWorkout, resetAll } = useStore()
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
   const [pickOpen, setPickOpen] = useState(false)
@@ -39,6 +39,12 @@ export function TodayScreen() {
   const deltaPct = prevWeek > 0 ? Math.round(((thisWeek - prevWeek) / prevWeek) * 100) : null
   const body = bodyweightTrend(state.bodyweight)
   const lastBody = body[body.length - 1]
+  const streak = weeklyStreak(state.workouts, todayISO())
+  const activeEmpty = active ? workoutSetCount(active) === 0 : false
+
+  const discardActive = () => {
+    if (active && window.confirm('¿Descartar este entrenamiento vacío?')) deleteWorkout(active.id)
+  }
 
   const begin = (sessionId: string) => {
     const id = startWorkout(sessionId)
@@ -66,10 +72,28 @@ export function TodayScreen() {
             <div>
               <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>Entrenamiento en curso</div>
               <div style={{ fontWeight: 600, marginTop: 2 }}>{active.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 1 }}>
+                {activeEmpty ? 'Sin series todavía' : `${workoutSetCount(active)} series registradas`}
+              </div>
             </div>
             <PillButton icon={<Play size={16} fill="#fff" />} onClick={() => navigate(`/workout/${active.id}`)}>
               Continuar
             </PillButton>
+          </div>
+          {activeEmpty && (
+            <button type="button" onClick={discardActive} style={discardBtn}>
+              <Trash2 size={14} /> Descartar
+            </button>
+          )}
+        </GlassCard>
+      )}
+
+      {streak >= 1 && (
+        <GlassCard style={{ padding: '11px 15px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 11 }}>
+          <span style={flameCircle}><Flame size={20} /></span>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>{streak} {streak === 1 ? 'semana' : 'semanas'} seguidas</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{streak === 1 ? 'Entrena otra semana para encadenar la racha' : '¡Sigue así, no rompas la cadena!'}</div>
           </div>
         </GlassCard>
       )}
@@ -126,11 +150,17 @@ export function TodayScreen() {
             <button aria-label="Registrar peso" className="gold-shine" onClick={(e) => { e.stopPropagation(); setBwOpen(true) }} style={miniAdd}><Plus size={16} /></button>
           </div>
           <div style={{ marginTop: 8 }}>
-            <CoinBadge size="lg">{lastBody ? `${lastBody.weight.toFixed(1).replace('.', ',')} kg` : '—'}</CoinBadge>
+            {lastBody ? (
+              <CoinBadge size="lg">{lastBody.weight.toFixed(1).replace('.', ',')} kg</CoinBadge>
+            ) : (
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-faint)', lineHeight: 1.3, padding: '4px 0' }}>
+                Sin registro<br />toca <b style={{ color: 'var(--accent)' }}>+</b> para añadir
+              </div>
+            )}
           </div>
           {lastBody && (
             <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 7 }}>
-              <TrendingDown size={14} /> media {lastBody.avg.toFixed(1).replace('.', ',')}
+              <Activity size={14} /> media {lastBody.avg.toFixed(1).replace('.', ',')}
             </div>
           )}
         </GlassCard>
@@ -244,6 +274,17 @@ const miniAdd: React.CSSProperties = {
   background: 'linear-gradient(180deg,#FFD75C,#EDA31E)', color: '#4A2E10',
   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
   boxShadow: 'inset 0 1px 0 rgba(255,245,210,.7), 0 2px 0 #A66A18',
+}
+const discardBtn: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 11, padding: '4px 2px',
+  background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+  fontSize: 13, fontWeight: 700, color: 'var(--ink-faint)',
+}
+const flameCircle: React.CSSProperties = {
+  width: 42, height: 42, flex: 'none', borderRadius: 13, color: '#fff',
+  background: 'linear-gradient(180deg,#FFB36B,#F0832B)', border: '2px solid #8A4A12',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  boxShadow: 'inset 0 1px 0 rgba(255,225,180,.6), 0 2px 0 #7A3E10',
 }
 const rowBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
