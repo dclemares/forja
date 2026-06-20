@@ -34,9 +34,9 @@ export function SessionsScreen() {
           {DAY_LABELS.map((d, i) => {
             const s = state.sessions.find((x) => x.id === state.weeklyPlan[i])
             return (
-              <button key={i} style={dayCell} onClick={() => setDayEdit(i)}>
-                <span style={{ color: 'var(--ink-soft)' }}>{d[0]}</span>
-                <b style={{ fontSize: 10, fontWeight: 600, color: s ? 'var(--accent)' : 'var(--ink-faint)', marginTop: 3 }}>
+              <button key={i} title={s ? s.name : 'Descanso'} style={dayCell} onClick={() => setDayEdit(i)}>
+                <span style={{ color: 'var(--ink-soft)', fontWeight: 700 }}>{d[0]}</span>
+                <b style={{ fontSize: 10, fontWeight: 700, color: s ? 'var(--accent)' : 'var(--ink-faint)', marginTop: 3 }}>
                   {s ? abbrev(s.name) : 'Desc'}
                 </b>
               </button>
@@ -79,7 +79,11 @@ export function SessionsScreen() {
   )
 }
 
-const abbrev = (n: string) => (n.length > 7 ? n.slice(0, 6) + '…' : n)
+const abbrev = (n: string) => {
+  const num = n.match(/(\d+)\s*$/)?.[1] ?? ''
+  const word = n.replace(/\s*\d+\s*$/, '').trim() || n
+  return (word.slice(0, 3) + num).toUpperCase()
+}
 const fullDay = (i: number) => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][i]
 
 const dayCell: React.CSSProperties = { flex: 1, textAlign: 'center', background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', border: '2px solid #9A6A3A', borderRadius: 11, padding: '8px 1px', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)' }

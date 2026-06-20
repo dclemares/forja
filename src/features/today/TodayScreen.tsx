@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronRight, LogOut, Play, Scale, Trash2, TrendingDown, History as HistoryIcon, User, Volume2, VolumeX } from 'lucide-react'
+import { CalendarDays, ChevronRight, LogOut, Play, Plus, Trash2, TrendingDown, TrendingUp, History as HistoryIcon, User, Volume2, VolumeX } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/auth'
 import { GlassCard } from '@/components/ui/GlassCard'
@@ -11,7 +11,7 @@ import { titlePlaque } from '@/components/ui/AppBar'
 import { isSoundEnabled, setSoundEnabled, playClick } from '@/lib/sound'
 import { formatLongDate, formatNumber, todayISO } from '@/lib/format'
 import { workoutVolume } from '@/lib/domain/volume'
-import { weeklyVolume, bodyweightTrend } from '@/lib/domain/trends'
+import { isoWeekKey, bodyweightTrend } from '@/lib/domain/trends'
 
 export function TodayScreen() {
   const { state, startWorkout, startFreeWorkout, addBodyweight, resetAll } = useStore()
@@ -29,8 +29,14 @@ export function TodayScreen() {
 
   const finished = state.workouts.filter((w) => w.finishedAt).sort((a, b) => b.date.localeCompare(a.date))
   const last = finished[0]
-  const weekly = weeklyVolume(finished)
-  const thisWeek = weekly[weekly.length - 1]?.volume ?? 0
+  // Volumen de la semana ACTUAL y comparativa con la anterior.
+  const curKey = isoWeekKey(todayISO())
+  const prev = new Date()
+  prev.setDate(prev.getDate() - 7)
+  const prevKey = isoWeekKey(`${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`)
+  const thisWeek = finished.filter((w) => isoWeekKey(w.date) === curKey).reduce((a, w) => a + workoutVolume(w), 0)
+  const prevWeek = finished.filter((w) => isoWeekKey(w.date) === prevKey).reduce((a, w) => a + workoutVolume(w), 0)
+  const deltaPct = prevWeek > 0 ? Math.round(((thisWeek - prevWeek) / prevWeek) * 100) : null
   const body = bodyweightTrend(state.bodyweight)
   const lastBody = body[body.length - 1]
 
@@ -106,16 +112,24 @@ export function TodayScreen() {
         <GlassCard style={{ padding: 16 }}>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Volumen semanal</div>
           <div style={{ marginTop: 8 }}>
-            <CoinBadge>{formatNumber(thisWeek)} kg</CoinBadge>
+            <CoinBadge size="lg">{formatNumber(thisWeek)} kg</CoinBadge>
           </div>
+          {deltaPct != null && (
+            <div style={{ fontSize: 12, fontWeight: 700, color: deltaPct >= 0 ? '#3E8E2E' : '#C5403F', display: 'flex', alignItems: 'center', gap: 3, marginTop: 7 }}>
+              {deltaPct >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {Math.abs(deltaPct)}% vs anterior
+            </div>
+          )}
         </GlassCard>
         <GlassCard style={{ padding: 16, cursor: 'pointer' }} onClick={() => navigate('/bodyweight')}>
-          <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Peso corporal</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Peso corporal</div>
+            <button aria-label="Registrar peso" className="gold-shine" onClick={(e) => { e.stopPropagation(); setBwOpen(true) }} style={miniAdd}><Plus size={16} /></button>
+          </div>
           <div style={{ marginTop: 8 }}>
-            <CoinBadge>{lastBody ? `${lastBody.weight.toFixed(1).replace('.', ',')} kg` : '—'}</CoinBadge>
+            <CoinBadge size="lg">{lastBody ? `${lastBody.weight.toFixed(1).replace('.', ',')} kg` : '—'}</CoinBadge>
           </div>
           {lastBody && (
-            <div style={{ fontSize: 12, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 6 }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 3, marginTop: 7 }}>
               <TrendingDown size={14} /> media {lastBody.avg.toFixed(1).replace('.', ',')}
             </div>
           )}
@@ -141,15 +155,6 @@ export function TodayScreen() {
         </GlassCard>
       )}
 
-      <GlassCard style={{ padding: 15 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-            <span style={iconCircle}><Scale size={20} /></span>
-            <div style={{ fontSize: 14 }}>Registrar peso corporal</div>
-          </div>
-          <PillButton variant="ghost" onClick={() => setBwOpen(true)}>+ Registrar</PillButton>
-        </div>
-      </GlassCard>
 
       <Sheet open={pickOpen} onClose={() => setPickOpen(false)} title="Elegir sesión">
         <div style={{ paddingBottom: 8 }}>
@@ -233,6 +238,12 @@ const iconCircle: React.CSSProperties = {
   width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(180deg,#F5E9CB,#E6D2A2)', border: '2px solid #8A5A2A', color: '#EDA31E',
   display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,.6), 0 2px 0 #6E4423',
+}
+const miniAdd: React.CSSProperties = {
+  width: 30, height: 30, flex: 'none', borderRadius: 999, border: '2px solid #7A4A12',
+  background: 'linear-gradient(180deg,#FFD75C,#EDA31E)', color: '#4A2E10',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+  boxShadow: 'inset 0 1px 0 rgba(255,245,210,.7), 0 2px 0 #A66A18',
 }
 const rowBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
