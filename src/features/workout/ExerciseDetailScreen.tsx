@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftRight, ChartLine, ClipboardList, Flame, History as HistoryIcon, MoreVertical, Plus, SlidersHorizontal, Table, Trash2, X } from 'lucide-react'
+import { ArrowLeftRight, ChartLine, ClipboardList, History as HistoryIcon, MoreVertical, Plus, SlidersHorizontal, Table, Trash2, Trophy, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { CoinBadge } from '@/components/ui/CoinBadge'
@@ -116,13 +116,9 @@ export function ExerciseDetailScreen() {
           Añadir serie
         </PillButton>
         {(pr.weight || pr.volume) && (
-          <div style={prBanner} className="pr-fire">
-            <FlameCrest />
-            <Flame size={17} fill="#FFE07A" color="#7A2208" strokeWidth={2.2} className="pr-flame" />
-            <span style={{ position: 'relative', zIndex: 1 }}>
-              {pr.weight && pr.volume ? '¡Récord de peso y volumen!' : pr.weight ? '¡Récord de peso!' : '¡Récord de volumen!'}
-            </span>
-            <Flame size={17} fill="#FFE07A" color="#7A2208" strokeWidth={2.2} className="pr-flame" style={{ transform: 'scaleX(-1)' }} />
+          <div style={prBanner} className="anim-pop">
+            <Trophy size={16} />
+            {pr.weight && pr.volume ? '¡Récord de peso y volumen!' : pr.weight ? '¡Récord de peso!' : '¡Récord de volumen!'}
           </div>
         )}
         <div style={volRow}>
@@ -243,26 +239,6 @@ function CardHeader({ icon, children }: { icon: React.ReactNode; children: React
   )
 }
 
-/** Cresta de llamas cartoon que asoma por el borde superior del cartel de récord. */
-function FlameCrest() {
-  const xs = [12, 38, 64, 90, 116, 142, 168, 194, 220, 246, 272, 296]
-  return (
-    <svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 19, transform: 'translateY(-58%)', pointerEvents: 'none', filter: 'drop-shadow(0 1px 1px rgba(120,30,8,.35))' }}>
-      <defs>
-        <g id="ft">
-          <path d="M0,0 C5.5,7 7.5,11 5.5,16 C4.5,21 2,24 0,24 C-2,24 -4.5,21 -5.5,16 C-7.5,11 -5.5,7 0,0 Z" fill="#F0531E" />
-          <path d="M0,6 C3,10 4,13.5 3,17.5 C2,21 1,23.5 0,23.5 C-1,23.5 -2,21 -3,17.5 C-4,13.5 -3,10 0,6 Z" fill="#FFD24A" />
-        </g>
-      </defs>
-      {xs.map((x, i) => (
-        <g key={i} transform={`translate(${x},${i % 2 ? 3 : 0}) scale(${1.5 - (i % 3) * 0.2})`}>
-          <use href="#ft" style={{ transformBox: 'fill-box', transformOrigin: 'center bottom', animation: `flame ${0.8 + (i % 3) * 0.12}s ease-in-out ${(i % 4) * 0.1}s infinite` }} />
-        </g>
-      ))}
-    </svg>
-  )
-}
-
 const cardHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid var(--hairline)' }
 const hint: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent-tint)', color: 'var(--accent)', fontSize: 11, padding: '5px 11px', borderRadius: 13, marginBottom: 4 }
 const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 11, padding: '0 2px' }
@@ -271,7 +247,7 @@ const stepPill: React.CSSProperties = { display: 'inline-flex', alignItems: 'cen
 const metaRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', width: '100%', padding: '5px 2px 0 24px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, textAlign: 'left' }
 const rpeChip: React.CSSProperties = { background: 'var(--accent-tint)', color: 'var(--accent)', fontWeight: 800, fontSize: 11, padding: '2px 8px', borderRadius: 999 }
 const noteTxt: React.CSSProperties = { color: 'var(--ink-soft)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }
-const prBanner: React.CSSProperties = { position: 'relative', overflow: 'visible', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, marginTop: 18, padding: '9px 14px', borderRadius: 12, fontSize: 14, fontWeight: 800, color: '#FFF3D8', background: 'linear-gradient(180deg,#FFCE3E 0%,#FF8A1E 55%,#EF4E1E 100%)', border: '3px solid #8A2A0A', textShadow: '0 1px 0 rgba(120,30,8,.7), 0 2px 4px rgba(110,25,6,.45)', boxShadow: 'inset 0 1px 0 rgba(255,240,200,.5), 0 0 14px rgba(255,120,30,.55)' }
+const prBanner: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12, padding: '8px 12px', borderRadius: 12, fontSize: 14, fontWeight: 800, color: '#4A2E10', background: 'linear-gradient(180deg,#FFE08A,#EDB836)', border: '2px solid #7A4A12', boxShadow: 'inset 0 1px 0 rgba(255,245,210,.7)' }
 const rpeOpt = (active: boolean): React.CSSProperties => ({ minWidth: 44, padding: '9px 0', flex: 1, border: '2px solid #7A4A12', borderRadius: 11, fontSize: 15, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', color: active ? '#4A2E10' : '#6E4423', background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'linear-gradient(180deg,#F0E2C0,#E3CE9E)', boxShadow: active ? 'inset 0 1px 0 rgba(255,245,210,.7)' : 'none' })
 const noteInput: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const sn: React.CSSProperties = { textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14, fontWeight: 500 }
