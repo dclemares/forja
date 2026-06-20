@@ -167,17 +167,15 @@ export function TodayScreen() {
       </div>
 
       {last && (
-        <GlassCard style={{ padding: 15, marginBottom: 12 }}>
+        <GlassCard style={{ padding: 15, marginBottom: 12 }} onClick={() => navigate(`/history/${last.id}`)}>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8 }}>Último entrenamiento</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }} onClick={() => navigate(`/history/${last.id}`)}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-              <span style={iconCircle}><HistoryIcon size={20} /></span>
-              <div>
-                <div style={{ fontWeight: 600 }}>{last.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{last.exercises.length} ejercicios</div>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+            <span style={iconCircle}><HistoryIcon size={20} /></span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{last.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{last.exercises.length} {last.exercises.length === 1 ? 'ejercicio' : 'ejercicios'}</div>
             </div>
-            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
               <CoinBadge>{formatNumber(workoutVolume(last))} kg</CoinBadge>
               <ChevronRight size={18} color="#8A5A2A" />
             </div>

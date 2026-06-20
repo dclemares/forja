@@ -40,7 +40,7 @@ export function buildFreeWorkout(opts: { date: string; id: IdGen }): Workout {
     id: opts.id(),
     date: opts.date,
     sessionId: null,
-    name: 'Entrenamiento libre',
+    name: 'Entreno libre',
     exercises: [],
     createdAt: opts.date,
     finishedAt: null,

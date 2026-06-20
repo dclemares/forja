@@ -68,6 +68,8 @@ export function ExerciseDetailScreen() {
 
   const pr = exercisePR(we, state.workouts, id)
   const metaSet = metaSetId ? we.sets.find((s) => s.id === metaSetId) ?? null : null
+  const hasSets = we.sets.length > 0
+  const hasChartData = history.length > 0 || exerciseVolume(we) > 0
 
   return (
     <div className="anim-fade">
@@ -85,12 +87,14 @@ export function ExerciseDetailScreen() {
           <span style={hint}><HistoryIcon size={13} /> Prerellenado con tu última vez</span>
           <button type="button" onClick={cycleStep} style={stepPill} aria-label="Cambiar paso de peso">Paso {fmtKg(wstep)}</button>
         </div>
-        <div style={{ ...gridHead }}>
-          <span />
-          <span style={{ textAlign: 'center' }}>Peso (kg)</span>
-          <span style={{ textAlign: 'center' }}>Reps</span>
-          <span />
-        </div>
+        {hasSets && (
+          <div style={{ ...gridHead }}>
+            <span />
+            <span style={{ textAlign: 'center' }}>Peso (kg)</span>
+            <span style={{ textAlign: 'center' }}>Reps</span>
+            <span />
+          </div>
+        )}
         {we.sets.map((s, i) => (
           <div key={s.id} className="anim-pop" style={{ marginTop: 9 }}>
             <div style={row}>
@@ -106,7 +110,7 @@ export function ExerciseDetailScreen() {
             </button>
           </div>
         ))}
-        {we.sets.length === 0 && <div style={{ color: 'var(--ink-faint)', fontSize: 14, padding: '10px 2px' }}>Aún no hay series. Añade la primera.</div>}
+        {!hasSets && <div style={{ color: 'var(--ink-faint)', fontSize: 14, textAlign: 'center', padding: '14px 2px 4px' }}>Aún no hay series. Pulsa “Añadir serie”.</div>}
         <PillButton full variant="tonal" icon={<Plus size={16} />} style={{ marginTop: 12 }} onClick={() => addSet(id, weId)}>
           Añadir serie
         </PillButton>
@@ -122,7 +126,7 @@ export function ExerciseDetailScreen() {
         </div>
       </GlassCard>
 
-      <RestTimer trigger={we.sets.length} />
+      {hasSets && <RestTimer trigger={we.sets.length} />}
 
       <SectionTitle icon={<Table size={16} />}>Histórico de semanas anteriores</SectionTitle>
       <GlassCard style={{ padding: 15, marginBottom: 4 }}>
@@ -147,14 +151,20 @@ export function ExerciseDetailScreen() {
       </GlassCard>
 
       <SectionTitle icon={<ChartLine size={16} />}>Volumen total del ejercicio</SectionTitle>
-      <GlassCard style={{ padding: 15 }}>
-        <LineChart data={chartData} />
-        {history.length === 0 && (
-          <div style={{ fontSize: 12, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 6 }}>
-            Primer registro · vuelve a hacerlo otra semana para ver tu evolución.
-          </div>
-        )}
-      </GlassCard>
+      {hasChartData ? (
+        <GlassCard style={{ padding: 15 }}>
+          <LineChart data={chartData} />
+          {history.length === 0 && (
+            <div style={{ fontSize: 12, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 6 }}>
+              Primer registro · vuelve otra semana para ver tu evolución.
+            </div>
+          )}
+        </GlassCard>
+      ) : (
+        <GlassCard style={{ padding: '16px 15px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
+          Registra alguna serie para empezar a ver tu evolución.
+        </GlassCard>
+      )}
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Opciones del ejercicio">
         <div style={{ paddingBottom: 8 }}>

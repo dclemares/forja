@@ -26,7 +26,7 @@ export function AppBar({ title, subtitle, back, onBack, right, large = false }: 
               <ChevronLeft size={22} />
             </button>
           )}
-          <h1 style={large ? titlePlaque : { margin: 0, fontSize: 19, fontWeight: 700, letterSpacing: '-0.2px', lineHeight: 1.1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <h1 style={large ? titlePlaque : titlePlaqueSmall}>
             {title}
           </h1>
         </div>
@@ -53,6 +53,28 @@ export const titlePlaque: React.CSSProperties = {
   boxShadow:
     'inset 0 2px 0 rgba(255,210,140,.45), inset 0 0 0 4px rgba(201,134,31,.5), 0 4px 0 #34200E, 0 7px 10px rgba(20,12,4,.4)',
   textShadow: '0 2px 0 rgba(40,24,10,.55)',
+}
+
+/** Placa de madera compacta para títulos de pantallas de detalle (no quedan sobre el fondo). */
+export const titlePlaqueSmall: React.CSSProperties = {
+  display: 'inline-block',
+  margin: 0,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  background: 'linear-gradient(180deg,#A06A35,#7E5026)',
+  border: '2.5px solid #4A2E16',
+  borderRadius: 11,
+  padding: '4px 13px 5px',
+  color: '#FBEFD3',
+  fontSize: 18,
+  fontWeight: 800,
+  letterSpacing: '0.2px',
+  lineHeight: 1.2,
+  boxShadow: 'inset 0 1px 0 rgba(255,210,140,.4), 0 3px 0 #34200E, 0 5px 8px rgba(20,12,4,.3)',
+  textShadow: '0 1px 0 rgba(40,24,10,.5)',
 }
 
 export const iconBtn: React.CSSProperties = {
