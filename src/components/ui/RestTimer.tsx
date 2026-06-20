@@ -65,11 +65,11 @@ export function RestTimer({ trigger }: { trigger?: number }) {
         <div style={{ marginTop: 10 }}>
           {running ? (
             <button type="button" onClick={() => { setLeft(0); playClick() }} style={runBtn}>
-              <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 22, fontWeight: 800, letterSpacing: '0.5px' }}>{fmt(left)}</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700 }}>
+              <span aria-hidden style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${(left / dur) * 100}%`, background: 'linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 48%), linear-gradient(180deg,#FFD75C,#EDA31E)', transition: 'width 1s linear' }} />
+              <span style={{ position: 'relative', zIndex: 1, fontVariantNumeric: 'tabular-nums', fontSize: 22, fontWeight: 800, letterSpacing: '0.5px' }}>{fmt(left)}</span>
+              <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700 }}>
                 <X size={15} /> Saltar
               </span>
-              <span style={{ position: 'absolute', left: 0, bottom: 0, height: 4, background: 'rgba(74,46,22,.5)', width: `${(left / dur) * 100}%`, transition: 'width 1s linear', borderRadius: '0 3px 0 0' }} />
             </button>
           ) : (
             <button type="button" onClick={() => { setLeft(dur); playClick() }} style={startBtn}>
@@ -121,12 +121,12 @@ const runBtn: React.CSSProperties = {
   width: '100%',
   border: '2px solid #7A4A12',
   borderRadius: 12,
-  padding: '9px 14px',
+  padding: '12px 14px',
   fontFamily: 'inherit',
   cursor: 'pointer',
   color: '#4A2E10',
-  background: 'linear-gradient(180deg,#F7E8C6,#EAD3A2)',
-  boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)',
+  background: 'linear-gradient(180deg,#E3CC98,#D2B57F)',
+  boxShadow: 'inset 0 2px 5px rgba(80,50,20,.3)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
