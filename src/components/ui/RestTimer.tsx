@@ -65,7 +65,7 @@ export function RestTimer({ trigger }: { trigger?: number }) {
         <div style={{ marginTop: 10 }}>
           {running ? (
             <button type="button" onClick={() => { setLeft(0); playClick() }} style={runBtn}>
-              <span aria-hidden style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${(left / dur) * 100}%`, background: 'linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 48%), linear-gradient(180deg,#FFD75C,#EDA31E)', transition: 'width 1s linear' }} />
+              <span aria-hidden style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${(left / dur) * 100}%`, background: 'linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 48%), linear-gradient(180deg,#FFD75C,#EDA31E)', boxShadow: '4px 0 8px -1px rgba(50,30,10,.55)', transition: 'width 1s linear' }} />
               <span style={{ position: 'relative', zIndex: 1, fontVariantNumeric: 'tabular-nums', fontSize: 22, fontWeight: 800, letterSpacing: '0.5px' }}>{fmt(left)}</span>
               <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700 }}>
                 <X size={15} /> Saltar
