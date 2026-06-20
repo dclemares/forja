@@ -41,7 +41,7 @@ export function ExercisesScreen() {
         <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--ink-faint)' }} />
         <input placeholder="Buscar ejercicio..." value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inputStyle, paddingLeft: 36 }} />
       </div>
-      <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 10 }}>
+      <div className="no-scrollbar" style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 10, paddingRight: 14, scrollPaddingRight: 14 }}>
         <Chip active={!filter} onClick={() => setFilter(null)}>Todos</Chip>
         {MUSCLE_GROUPS.map((g) => <Chip key={g} active={filter === g} onClick={() => setFilter(g)}>{g}</Chip>)}
       </div>

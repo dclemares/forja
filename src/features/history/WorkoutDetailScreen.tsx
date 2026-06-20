@@ -31,7 +31,7 @@ export function WorkoutDetailScreen() {
         right={<button aria-label="Opciones" style={iconBtn} onClick={() => setMenuOpen(true)}><MoreVertical size={20} /></button>}
       />
 
-      <GlassCard style={{ padding: '14px 18px', marginBottom: 14, background: 'var(--accent-tint)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <GlassCard style={{ padding: '14px 18px', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Volumen total</span>
         <span style={{ fontSize: 20, fontWeight: 600, color: 'var(--accent)' }}>{formatNumber(workoutVolume(workout))} kg</span>
       </GlassCard>

@@ -14,25 +14,25 @@ interface AppBarProps {
 export function AppBar({ title, subtitle, back, onBack, right, large = false }: AppBarProps) {
   const navigate = useNavigate()
   return (
-    <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, margin: '6px 2px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        {back && (
-          <button
-            aria-label="Volver"
-            onClick={() => (onBack ? onBack() : navigate(-1))}
-            style={iconBtn}
-          >
-            <ChevronLeft size={22} />
-          </button>
-        )}
-        <div style={{ minWidth: 0 }}>
-          <h1 style={large ? titlePlaque : { margin: 0, fontSize: 19, fontWeight: 700, letterSpacing: '-0.2px', lineHeight: 1.1 }}>
+    <header style={{ margin: '6px 2px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          {back && (
+            <button
+              aria-label="Volver"
+              onClick={() => (onBack ? onBack() : navigate(-1))}
+              style={iconBtn}
+            >
+              <ChevronLeft size={22} />
+            </button>
+          )}
+          <h1 style={large ? titlePlaque : { margin: 0, fontSize: 19, fontWeight: 700, letterSpacing: '-0.2px', lineHeight: 1.1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title}
           </h1>
-          {subtitle && <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 4 }}>{subtitle}</div>}
         </div>
+        {right && <div style={{ flex: 'none' }}>{right}</div>}
       </div>
-      {right && <div style={{ flex: 'none' }}>{right}</div>}
+      {subtitle && <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 5, paddingLeft: back ? 48 : 2 }}>{subtitle}</div>}
     </header>
   )
 }

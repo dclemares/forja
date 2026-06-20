@@ -35,12 +35,13 @@ export function Tag({ children }: { children: React.ReactNode }) {
       style={{
         display: 'inline-block',
         fontSize: 12,
-        fontWeight: 700,
+        fontWeight: 800,
         padding: '3px 11px',
         borderRadius: 999,
-        background: 'rgba(120,80,30,.16)',
-        border: '1.5px solid rgba(120,80,30,.35)',
-        color: '#7A4A12',
+        background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)',
+        border: '2px solid #9A6A3A',
+        color: '#5A3A18',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)',
       }}
     >
       {children}

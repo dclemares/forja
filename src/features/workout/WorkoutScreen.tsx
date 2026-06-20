@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronRight, CircleCheck, Plus } from 'lucide-react'
+import { Check, ChevronRight, CircleCheck, Plus, Timer } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
@@ -59,7 +59,12 @@ export function WorkoutScreen() {
         back
         onBack={() => navigate('/')}
         title={workout.name}
-        subtitle={<span style={{ color: 'var(--accent)', fontFamily: 'ui-monospace, monospace' }}>{fmtTime(elapsed)}</span>}
+        subtitle={
+          <span style={timerPill}>
+            <Timer size={13} style={{ color: 'var(--accent)' }} />
+            <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{fmtTime(elapsed)}</span>
+          </span>
+        }
         right={<PillButton icon={<Check size={16} />} onClick={finish}>Finalizar</PillButton>}
       />
 
@@ -140,5 +145,11 @@ function fmtTime(s: number) {
 }
 
 const summary: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 20, padding: '14px 18px', marginBottom: 14, background: 'var(--accent-tint)',
+  display: 'flex', alignItems: 'center', gap: 20, padding: '14px 18px', marginBottom: 14,
+}
+const timerPill: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  background: 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', border: '2px solid #9A6A3A', borderRadius: 999,
+  padding: '2px 11px', color: '#5A3A18', fontSize: 13,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)',
 }

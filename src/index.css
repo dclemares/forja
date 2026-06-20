@@ -161,3 +161,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
 /* Feedback de pulsación en tarjetas pulsables */
 .tappable { transition: transform 0.08s ease; }
 .tappable:active { transform: scale(0.985); }
+
+/* Scroll horizontal sin barra visible (filtros, chips) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
