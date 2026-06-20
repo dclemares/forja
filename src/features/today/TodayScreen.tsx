@@ -48,7 +48,7 @@ export function TodayScreen() {
           <h1 style={titlePlaque}>Entrenar</h1>
         </div>
         {session && (
-          <button aria-label="Perfil" onClick={() => setProfileOpen(true)} style={{ width: 46, height: 46, borderRadius: 999, border: '2.5px solid #4A2E16', background: 'repeating-linear-gradient(90deg,rgba(40,24,10,.12) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(255,215,150,.06) 0 1px,transparent 1px 4px),linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 'none', boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), 0 3px 0 #34200E' }}>
+          <button aria-label="Perfil" onClick={() => setProfileOpen(true)} style={{ width: 46, height: 46, borderRadius: 999, border: '2.5px solid #4A2E16', background: 'linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 'none', boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), 0 3px 0 #34200E' }}>
             <User size={20} />
           </button>
         )}

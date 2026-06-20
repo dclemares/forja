@@ -41,7 +41,7 @@ export function AppBar({ title, subtitle, back, onBack, right, large = false }: 
 export const titlePlaque: React.CSSProperties = {
   display: 'inline-block',
   margin: 0,
-  background: 'repeating-linear-gradient(90deg,rgba(40,24,10,.12) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(255,215,150,.06) 0 1px,transparent 1px 4px),linear-gradient(180deg,#A06A35,#7E5026)',
+  background: 'linear-gradient(180deg,#A06A35,#7E5026)',
   border: '3px solid #4A2E16',
   borderRadius: 14,
   padding: '5px 18px 7px',

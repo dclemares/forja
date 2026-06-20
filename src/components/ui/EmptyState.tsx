@@ -16,7 +16,7 @@ const medallion: React.CSSProperties = {
   margin: '0 auto',
   borderRadius: 24,
   background:
-    'linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0) 45%), repeating-linear-gradient(90deg,rgba(40,24,10,.12) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(255,215,150,.06) 0 1px,transparent 1px 4px),linear-gradient(180deg,#A06A35,#7E5026)',
+    'linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0) 45%), linear-gradient(180deg,#A06A35,#7E5026)',
   border: '3px solid #4A2E16',
   color: '#FBEFD3',
   display: 'flex',

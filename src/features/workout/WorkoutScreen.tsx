@@ -14,7 +14,7 @@ import { formatNumber } from '@/lib/format'
 export function WorkoutScreen() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const { state, addWorkoutExercise, finishWorkout } = useStore()
+  const { state, addWorkoutExercise, finishWorkout, deleteWorkout } = useStore()
   const workout = state.workouts.find((w) => w.id === id)
   const [addOpen, setAddOpen] = useState(false)
   const [elapsed, setElapsed] = useState(0)
@@ -35,6 +35,12 @@ export function WorkoutScreen() {
   }
 
   const finish = () => {
+    if (workoutSetCount(workout) === 0) {
+      // Entreno vacío: descartar en vez de celebrar.
+      deleteWorkout(workout.id)
+      navigate('/')
+      return
+    }
     finishWorkout(workout.id)
     setDone(true)
   }

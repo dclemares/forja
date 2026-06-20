@@ -31,8 +31,8 @@
   --parch-bot: #E7D0A0;
   /* Texto */
   --ink: #3A2410;
-  --ink-soft: rgba(58, 36, 16, 0.66);
-  --ink-faint: rgba(58, 36, 16, 0.42);
+  --ink-soft: rgba(48, 28, 10, 0.82);
+  --ink-faint: rgba(50, 30, 12, 0.6);
   --cream: #FBEFD3;
   --hairline: rgba(110, 68, 35, 0.22);
   --bg: #A8804A;
@@ -147,3 +147,17 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
 a, button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+
+/* Foco visible (accesibilidad de teclado) */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid #B07F18 !important;
+  outline-offset: 1px;
+}
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 3px solid #B07F18;
+  outline-offset: 2px;
+}
+
+/* Feedback de pulsación en tarjetas pulsables */
+.tappable { transition: transform 0.08s ease; }
+.tappable:active { transform: scale(0.985); }

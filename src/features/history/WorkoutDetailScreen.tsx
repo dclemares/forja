@@ -59,7 +59,7 @@ export function WorkoutDetailScreen() {
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Entrenamiento">
         <div style={{ paddingBottom: 8 }}>
-          <button style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--danger)', textAlign: 'left' }} onClick={() => { deleteWorkout(workout.id); navigate('/history') }}>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--danger)', textAlign: 'left' }} onClick={() => { if (window.confirm('¿Eliminar este entrenamiento del historial?')) { deleteWorkout(workout.id); navigate('/history') } }}>
             <Trash2 size={19} /> Eliminar entrenamiento
           </button>
         </div>
@@ -68,7 +68,7 @@ export function WorkoutDetailScreen() {
   )
 }
 
-const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 34px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 8, padding: '0 2px' }
-const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 34px', gap: 8, alignItems: 'center', marginTop: 9 }
+const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 8, padding: '0 2px' }
+const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, alignItems: 'center', marginTop: 9 }
 const sn: React.CSSProperties = { textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14, fontWeight: 500 }
-const delBtn: React.CSSProperties = { width: 34, height: 34, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+const delBtn: React.CSSProperties = { width: 40, height: 40, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }

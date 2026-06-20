@@ -55,7 +55,7 @@ export function BodyweightScreen() {
               <span style={{ fontWeight: 600 }}>{b.weight.toFixed(1).replace('.', ',')} kg</span>
               <span style={{ fontSize: 12, color: 'var(--ink-soft)', marginLeft: 10 }}>{formatShortDate(b.date)}</span>
             </div>
-            <button aria-label="Eliminar" style={{ width: 34, height: 34, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer' }} onClick={() => deleteBodyweight(b.id)}><Trash2 size={16} /></button>
+            <button aria-label="Eliminar" style={{ width: 40, height: 40, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer' }} onClick={() => deleteBodyweight(b.id)}><Trash2 size={16} /></button>
           </div>
         </GlassCard>
       ))}

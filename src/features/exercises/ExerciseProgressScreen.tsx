@@ -77,7 +77,7 @@ export function ExerciseProgressScreen() {
           <button style={menuItem} onClick={() => { setMenuOpen(false); setName(exercise.name); setGroup(exercise.muscleGroup); setEditOpen(true) }}>
             <Pencil size={19} color="var(--accent)" /> Editar
           </button>
-          <button style={{ ...menuItem, color: 'var(--danger)' }} onClick={() => { deleteExercise(exercise.id); navigate('/exercises') }}>
+          <button style={{ ...menuItem, color: 'var(--danger)' }} onClick={() => { if (window.confirm(`¿Eliminar "${exercise.name}"? Su historial dejará de mostrarse.`)) { deleteExercise(exercise.id); navigate('/exercises') } }}>
             <Trash2 size={19} /> Eliminar
           </button>
         </div>

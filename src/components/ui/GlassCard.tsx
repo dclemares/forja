@@ -5,8 +5,9 @@ interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function GlassCard({ sheen = false, className = '', children, ...rest }: GlassCardProps) {
+  const tappable = typeof rest.onClick === 'function'
   return (
-    <div className={`glass ${sheen ? 'glass-sheen' : ''} ${className}`} {...rest}>
+    <div className={`glass ${sheen ? 'glass-sheen' : ''} ${tappable ? 'tappable' : ''} ${className}`} {...rest}>
       {children}
     </div>
   )

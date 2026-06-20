@@ -61,7 +61,7 @@ export function SessionDetailScreen() {
           <button style={menuItem} onClick={() => { setMenuOpen(false); setName(session.name); setRenameOpen(true) }}>
             <Pencil size={19} color="var(--accent)" /> Cambiar nombre
           </button>
-          <button style={{ ...menuItem, color: 'var(--danger)' }} onClick={() => { deleteSession(session.id); navigate('/sessions') }}>
+          <button style={{ ...menuItem, color: 'var(--danger)' }} onClick={() => { if (window.confirm(`¿Eliminar la sesión "${session.name}"?`)) { deleteSession(session.id); navigate('/sessions') } }}>
             <Trash2 size={19} /> Eliminar sesión
           </button>
         </div>
@@ -84,6 +84,6 @@ export function SessionDetailScreen() {
   )
 }
 
-const delBtn: React.CSSProperties = { width: 34, height: 34, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+const delBtn: React.CSSProperties = { width: 40, height: 40, borderRadius: 999, border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
 const menuItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--ink)', textAlign: 'left' }
 const inputStyle: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
