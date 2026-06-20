@@ -20,10 +20,13 @@ const wrap: React.CSSProperties = {
 const grain: React.CSSProperties = {
   position: 'absolute',
   inset: 0,
-  opacity: 0.6,
+  opacity: 0.7,
   backgroundImage:
-    'repeating-linear-gradient(92deg, rgba(74,46,22,0.14) 0px, rgba(74,46,22,0.14) 2px, transparent 2px, transparent 30px),' +
-    'repeating-linear-gradient(92deg, rgba(255,225,170,0.07) 0px, rgba(255,225,170,0.07) 1px, transparent 1px, transparent 15px)',
+    // juntas de tablón (bordes de tabla cada ~94px)
+    'repeating-linear-gradient(90deg, transparent 0 90px, rgba(40,24,10,0.20) 90px 93px, rgba(255,224,168,0.08) 93px 94px, transparent 94px 96px),' +
+    // veta fina
+    'repeating-linear-gradient(90deg, rgba(74,46,22,0.13) 0px, rgba(74,46,22,0.13) 2px, transparent 2px, transparent 30px),' +
+    'repeating-linear-gradient(90deg, rgba(255,225,170,0.06) 0px, rgba(255,225,170,0.06) 1px, transparent 1px, transparent 15px)',
 }
 
 const vignette: React.CSSProperties = {

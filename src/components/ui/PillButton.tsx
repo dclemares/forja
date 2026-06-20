@@ -23,7 +23,7 @@ interface VStyle {
 
 const V: Record<Variant, VStyle> = {
   primary: { bg: 'linear-gradient(180deg,#FFD75C,#EDA31E)', color: '#4A2E10', border: '#7A4A12', threeD: '#A66A18', highlight: 'rgba(255,240,200,.75)', textShadow: '0 1px 0 rgba(255,240,200,.5)' },
-  tonal: { bg: 'linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', border: '#4A2E16', threeD: '#34200E', highlight: 'rgba(255,210,140,.35)', textShadow: '0 1px 1px rgba(40,24,10,.5)' },
+  tonal: { bg: 'repeating-linear-gradient(90deg,rgba(40,24,10,.12) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(255,215,150,.06) 0 1px,transparent 1px 4px),linear-gradient(180deg,#A06A35,#7E5026)', color: '#FBEFD3', border: '#4A2E16', threeD: '#34200E', highlight: 'rgba(255,210,140,.35)', textShadow: '0 1px 1px rgba(40,24,10,.5)' },
   ghost: { bg: 'linear-gradient(180deg,#F0E2C0,#E3CE9E)', color: '#5A3A18', border: '#7A4A12', threeD: '#BC9C68', highlight: 'rgba(255,255,255,.6)' },
   danger: { bg: 'linear-gradient(180deg,#F18A6A,#D2412C)', color: '#fff', border: '#7A1E12', threeD: '#9A2A1A', highlight: 'rgba(255,200,180,.5)', textShadow: '0 1px 1px rgba(120,20,10,.6)' },
   dashed: { bg: 'rgba(247,231,194,.45)', color: '#7A4A12', border: '#8A5A2A', threeD: 'transparent', highlight: 'transparent', dashed: true, flat: true },

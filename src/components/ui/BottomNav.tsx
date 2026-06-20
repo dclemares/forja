@@ -53,7 +53,7 @@ const navStyle: React.CSSProperties = {
   padding: '8px 8px 10px',
   borderRadius: 22,
   zIndex: 30,
-  background: 'linear-gradient(180deg,#A06A35,#7E5026)',
+  background: 'repeating-linear-gradient(90deg,rgba(40,24,10,.12) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(255,215,150,.06) 0 1px,transparent 1px 4px),linear-gradient(180deg,#A06A35,#7E5026)',
   border: '3px solid #4A2E16',
   boxShadow: 'inset 0 2px 0 rgba(255,210,140,.35), inset 0 -5px 10px rgba(40,24,10,.45), 0 5px 0 #34200E, 0 9px 16px rgba(20,12,4,.5)',
 }
