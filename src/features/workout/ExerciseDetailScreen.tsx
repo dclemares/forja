@@ -78,12 +78,12 @@ export function ExerciseDetailScreen() {
         back
         onBack={() => navigate(`/workout/${id}`)}
         title={we.name}
-        subtitle={<Tag>{we.muscleGroup}</Tag>}
+        titleBadge={<Tag>{we.muscleGroup}</Tag>}
         right={<button aria-label="Opciones" style={iconBtn} onClick={() => setMenuOpen(true)}><MoreVertical size={20} /></button>}
       />
 
-      <SectionTitle icon={<ClipboardList size={16} />}>Series de hoy</SectionTitle>
-      <GlassCard style={{ padding: 15, marginBottom: 4 }}>
+      <GlassCard style={{ padding: 15, marginBottom: 14 }}>
+        <CardHeader icon={<ClipboardList size={16} />}>Series de hoy</CardHeader>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <span style={hint}><HistoryIcon size={13} /> Prerellenado con tu última vez</span>
           <button type="button" onClick={cycleStep} style={stepPill} aria-label="Cambiar paso de peso"><SlidersHorizontal size={12} /> Paso {fmtKg(wstep)}</button>
@@ -112,7 +112,7 @@ export function ExerciseDetailScreen() {
           </div>
         ))}
         {!hasSets && <div style={{ color: 'var(--ink-faint)', fontSize: 14, textAlign: 'center', padding: '14px 2px 4px' }}>Aún no hay series. Pulsa “Añadir serie”.</div>}
-        <PillButton full variant="primary" icon={<Plus size={16} />} style={{ marginTop: 12 }} onClick={() => addSet(id, weId)}>
+        <PillButton full variant="tonal" icon={<Plus size={16} />} style={{ marginTop: 12 }} onClick={() => addSet(id, weId)}>
           Añadir serie
         </PillButton>
         {(pr.weight || pr.volume) && (
@@ -129,8 +129,8 @@ export function ExerciseDetailScreen() {
 
       {hasSets && <RestTimer trigger={we.sets.length} />}
 
-      <SectionTitle icon={<Table size={16} />}>Histórico de semanas anteriores</SectionTitle>
-      <GlassCard flat style={{ padding: 15, marginBottom: 4 }}>
+      <GlassCard flat style={{ padding: 15, marginBottom: 14 }}>
+        <CardHeader icon={<Table size={16} />}>Histórico de semanas anteriores</CardHeader>
         {history.length ? (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <tbody>
@@ -151,9 +151,9 @@ export function ExerciseDetailScreen() {
         )}
       </GlassCard>
 
-      <SectionTitle icon={<ChartLine size={16} />}>Volumen total del ejercicio</SectionTitle>
       {hasChartData ? (
         <GlassCard flat style={{ padding: 15 }}>
+          <CardHeader icon={<ChartLine size={16} />}>Volumen total del ejercicio</CardHeader>
           <LineChart data={chartData} />
           {history.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 6 }}>
@@ -162,8 +162,9 @@ export function ExerciseDetailScreen() {
           )}
         </GlassCard>
       ) : (
-        <GlassCard flat style={{ padding: '16px 15px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
-          Registra alguna serie para empezar a ver tu evolución.
+        <GlassCard flat style={{ padding: 15 }}>
+          <CardHeader icon={<ChartLine size={16} />}>Volumen total del ejercicio</CardHeader>
+          <div style={{ textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13, padding: '6px 0 2px' }}>Registra alguna serie para empezar a ver tu evolución.</div>
         </GlassCard>
       )}
 
@@ -229,15 +230,16 @@ function SetMetaEditor({ set, onChange, onDone }: { set: WorkoutSet; onChange: (
   )
 }
 
-function SectionTitle({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+function CardHeader({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', margin: '16px 2px 8px' }}>
-      <span style={{ color: 'var(--accent)' }}>{icon}</span>
+    <div style={cardHead}>
+      <span style={{ color: 'var(--accent)', display: 'flex' }}>{icon}</span>
       {children}
     </div>
   )
 }
 
+const cardHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid var(--hairline)' }
 const hint: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent-tint)', color: 'var(--accent)', fontSize: 11, padding: '5px 11px', borderRadius: 13, marginBottom: 4 }
 const gridHead: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, fontSize: 11, color: 'var(--ink-soft)', marginTop: 11, padding: '0 2px' }
 const row: React.CSSProperties = { display: 'grid', gridTemplateColumns: '16px 1fr 1fr 40px', gap: 8, alignItems: 'center' }

@@ -5,13 +5,15 @@ import { useNavigate } from 'react-router-dom'
 interface AppBarProps {
   title: ReactNode
   subtitle?: ReactNode
+  /** Distintivo en línea, junto al título (p. ej. grupo muscular). */
+  titleBadge?: ReactNode
   back?: boolean
   onBack?: () => void
   right?: ReactNode
   large?: boolean
 }
 
-export function AppBar({ title, subtitle, back, onBack, right, large = false }: AppBarProps) {
+export function AppBar({ title, subtitle, titleBadge, back, onBack, right, large = false }: AppBarProps) {
   const navigate = useNavigate()
   return (
     <header style={{ margin: '6px 2px 16px' }}>
@@ -29,6 +31,7 @@ export function AppBar({ title, subtitle, back, onBack, right, large = false }: 
           <h1 style={large ? titlePlaque : titlePlaqueSmall}>
             {title}
           </h1>
+          {titleBadge && <span style={{ flex: 'none' }}>{titleBadge}</span>}
         </div>
         {right && <div style={{ flex: 'none' }}>{right}</div>}
       </div>
