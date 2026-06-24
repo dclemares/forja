@@ -10,7 +10,6 @@ export const formatWeight = (n: number): string =>
 const dmf = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' })
 const wdmf = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
 const longf = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
-const mof = new Intl.DateTimeFormat('es-ES', { month: 'short' })
 
 const parse = (iso: string) => {
   const [y, m, d] = iso.split('-').map(Number)
@@ -20,8 +19,6 @@ const parse = (iso: string) => {
 export const formatDayMonth = (iso: string): string => dmf.format(parse(iso))
 export const formatShortDate = (iso: string): string => wdmf.format(parse(iso))
 export const formatLongDate = (iso: string): string => longf.format(parse(iso))
-/** Mes corto a partir de "yyyy-mm" o "yyyy-mm-dd" (p. ej. "jun"). */
-export const formatMonthShort = (iso: string): string => mof.format(parse(iso.length === 7 ? iso + '-01' : iso))
 
 /** Desplaza una fecha ISO `days` días (negativo = atrás). Local, sin TZ. */
 export const shiftISO = (iso: string, days: number): string => {

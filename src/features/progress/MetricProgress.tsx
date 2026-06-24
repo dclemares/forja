@@ -2,12 +2,11 @@ import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { BodyChart, VBars, VBarsTrend } from '@/components/charts/Charts'
-import { movingAverage } from '@/lib/domain/trends'
-import { METRICS, PERIODS, bucketPoints, dailyPoints, filterPeriod, granularityForSpan, metricDef, summary, type MetricKey, type PeriodKey } from '@/lib/domain/progress'
+import { TrendChart } from '@/components/charts/TrendChart'
+import { METRICS, PERIODS, dailyPoints, filterPeriod, metricDef, summary, type MetricKey, type PeriodKey } from '@/lib/domain/progress'
 import { formatNumber, todayISO } from '@/lib/format'
 
-/** Selector de métrica + periodo con resumen (total/promedio) y gráfica.
+/** Selector de métrica + periodo con resumen (total/promedio) y gráfica con ejes.
  *  Reutilizable: en Progreso (todas las métricas) y en Nutrición (solo nutrición). */
 export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey[]; defaultMetric?: MetricKey }) {
   const { state } = useStore()
@@ -22,11 +21,7 @@ export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey
   )
   const points = filterPeriod(all, period, todayISO())
   const s = summary(points)
-  const bars = bucketPoints(points, granularityForSpan(points), def.agg)
   const periodLabel = PERIODS.find((p) => p.key === period)!.label
-  // El peso se dibuja como línea + tendencia (media móvil) a partir de los puntos diarios.
-  const pesoMa = movingAverage(points.map((p) => p.value), Math.max(1, Math.min(7, points.length)))
-  const pesoData = points.map((p, i) => ({ date: p.date, weight: p.value, avg: pesoMa[i] }))
 
   const withUnit = (v: number | null) => (v == null ? '—' : `${formatNumber(v)} ${def.unit}`)
   const isSum = def.agg === 'sum'
@@ -70,11 +65,9 @@ export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey
         </div>
       </GlassCard>
 
-      <GlassCard style={{ padding: 16 }}>
-        <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8 }}>
-          {def.label} · evolución ({def.unit}){(def.key === 'peso' || def.key === 'volumen') && <span style={{ color: 'var(--ink-faint)' }}> · con tendencia</span>}
-        </div>
-        {def.key === 'peso' ? <BodyChart data={pesoData} /> : def.key === 'volumen' ? <VBarsTrend data={bars} /> : <VBars data={bars} />}
+      <GlassCard style={{ padding: '14px 8px 8px' }}>
+        <div style={{ fontSize: 12, color: 'var(--ink-soft)', margin: '0 8px 4px' }}>{def.label} · evolución ({def.unit})</div>
+        <TrendChart points={points} unit={def.unit} zeroBased={def.zeroBased} avg={s.count ? s.avg : undefined} />
       </GlassCard>
     </div>
   )
