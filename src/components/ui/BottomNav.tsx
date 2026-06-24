@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { BarChart3, Dumbbell, History, ClipboardList, Play } from 'lucide-react'
+import { BarChart3, Dumbbell, Apple, ClipboardList, Play } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { playClick } from '@/lib/sound'
 
 const tabs: { to: string; label: string; icon: ReactNode }[] = [
   { to: '/sessions', label: 'Sesiones', icon: <ClipboardList size={22} /> },
   { to: '/exercises', label: 'Ejercicios', icon: <Dumbbell size={22} /> },
-  { to: '/history', label: 'Historial', icon: <History size={22} /> },
+  { to: '/nutrition', label: 'Nutrición', icon: <Apple size={22} /> },
   { to: '/progress', label: 'Progreso', icon: <BarChart3 size={22} /> },
 ]
 

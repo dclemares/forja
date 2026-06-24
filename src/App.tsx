@@ -7,7 +7,6 @@ import { SessionsScreen } from './features/sessions/SessionsScreen'
 import { SessionDetailScreen } from './features/sessions/SessionDetailScreen'
 import { ExercisesScreen } from './features/exercises/ExercisesScreen'
 import { ExerciseProgressScreen } from './features/exercises/ExerciseProgressScreen'
-import { HistoryScreen } from './features/history/HistoryScreen'
 import { WorkoutDetailScreen } from './features/history/WorkoutDetailScreen'
 import { ProgressScreen } from './features/progress/ProgressScreen'
 import { BodyweightScreen } from './features/bodyweight/BodyweightScreen'
@@ -43,7 +42,6 @@ export default function App() {
         <Route path="/sessions/:id" element={<SessionDetailScreen />} />
         <Route path="/exercises" element={<ExercisesScreen />} />
         <Route path="/exercises/:id" element={<ExerciseProgressScreen />} />
-        <Route path="/history" element={<HistoryScreen />} />
         <Route path="/history/:id" element={<WorkoutDetailScreen />} />
         <Route path="/progress" element={<ProgressScreen />} />
         <Route path="/bodyweight" element={<BodyweightScreen />} />

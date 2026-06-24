@@ -8,8 +8,9 @@ import { VBars, HBars, BodyChart } from '@/components/charts/Charts'
 import { volumeByMuscleGroup, workoutVolume } from '@/lib/domain/volume'
 import { bodyweightTrend, isoWeekKey, weeklyStreak, weeklyVolume } from '@/lib/domain/trends'
 import { formatNumber, todayISO } from '@/lib/format'
+import { HistoryList } from '@/features/history/HistoryList'
 
-type View = 'volumen' | 'grupos' | 'peso'
+type View = 'volumen' | 'grupos' | 'peso' | 'historial'
 
 export function ProgressScreen() {
   const { state } = useStore()
@@ -50,6 +51,7 @@ export function ProgressScreen() {
         <SegBtn active={view === 'volumen'} onClick={() => setView('volumen')}>Volumen</SegBtn>
         <SegBtn active={view === 'grupos'} onClick={() => setView('grupos')}>Grupos</SegBtn>
         <SegBtn active={view === 'peso'} onClick={() => setView('peso')}>Peso</SegBtn>
+        <SegBtn active={view === 'historial'} onClick={() => setView('historial')}>Historial</SegBtn>
       </div>
 
       {view === 'volumen' && (
@@ -75,13 +77,15 @@ export function ProgressScreen() {
           <BodyChart data={body} />
         </GlassCard>
       )}
+
+      {view === 'historial' && <HistoryList />}
     </div>
   )
 }
 
 function SegBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 13, padding: 8, borderRadius: 10, border: active ? '2px solid #7A4A12' : '2px solid transparent', background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'transparent', color: active ? '#4A2E10' : '#6E4423', fontWeight: 700, boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+    <button onClick={onClick} style={{ flex: 1, textAlign: 'center', fontSize: 12, padding: '8px 2px', borderRadius: 10, border: active ? '2px solid #7A4A12' : '2px solid transparent', background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'transparent', color: active ? '#4A2E10' : '#6E4423', fontWeight: 700, boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'none', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
       {children}
     </button>
   )

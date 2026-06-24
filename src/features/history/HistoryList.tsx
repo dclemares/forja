@@ -3,18 +3,21 @@ import { ChevronRight, History } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { AppBar } from '@/components/ui/AppBar'
 import { workoutSetCount, workoutVolume } from '@/lib/domain/volume'
 import { formatNumber, formatShortDate } from '@/lib/format'
 
-export function HistoryScreen() {
+/** Lista cronológica de entrenos finalizados. Reutilizable (vive dentro de Progreso). */
+export function HistoryList() {
   const { state } = useStore()
   const navigate = useNavigate()
   const workouts = state.workouts.filter((w) => w.finishedAt).sort((a, b) => b.date.localeCompare(a.date))
 
+  if (workouts.length === 0) {
+    return <EmptyState icon={<History size={40} />} title="Aún no hay entrenamientos" hint="Tus entrenos completados aparecerán aquí" />
+  }
+
   return (
-    <div className="anim-rise">
-      <AppBar title="Historial" large />
+    <>
       {workouts.map((w) => (
         <GlassCard key={w.id} style={{ padding: 15, marginBottom: 11, cursor: 'pointer' }} onClick={() => navigate(`/history/${w.id}`)}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -33,8 +36,7 @@ export function HistoryScreen() {
           </div>
         </GlassCard>
       ))}
-      {workouts.length === 0 && <EmptyState icon={<History size={40} />} title="Aún no hay entrenamientos" hint="Tus entrenos completados aparecerán aquí" />}
-    </div>
+    </>
   )
 }
 

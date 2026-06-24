@@ -19,13 +19,13 @@ export function WorkoutDetailScreen() {
   const workout = state.workouts.find((w) => w.id === id)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  if (!workout) return <div style={{ padding: 24 }}><PillButton onClick={() => navigate('/history')}>Volver</PillButton></div>
+  if (!workout) return <div style={{ padding: 24 }}><PillButton onClick={() => navigate('/progress')}>Volver</PillButton></div>
 
   return (
     <div className="anim-fade">
       <AppBar
         back
-        onBack={() => navigate('/history')}
+        onBack={() => navigate('/progress')}
         title={workout.name}
         subtitle={formatLongDate(workout.date)}
         right={<button aria-label="Opciones" style={iconBtn} onClick={() => setMenuOpen(true)}><MoreVertical size={20} /></button>}
@@ -68,7 +68,7 @@ export function WorkoutDetailScreen() {
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Entrenamiento">
         <div style={{ paddingBottom: 8 }}>
-          <button style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--danger)', textAlign: 'left' }} onClick={() => { if (window.confirm('¿Eliminar este entrenamiento del historial?')) { deleteWorkout(workout.id); navigate('/history') } }}>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 8px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--danger)', textAlign: 'left' }} onClick={() => { if (window.confirm('¿Eliminar este entrenamiento del historial?')) { deleteWorkout(workout.id); navigate('/progress') } }}>
             <Trash2 size={19} /> Eliminar entrenamiento
           </button>
         </div>
