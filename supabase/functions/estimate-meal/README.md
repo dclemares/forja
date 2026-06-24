@@ -1,62 +1,50 @@
 # estimate-meal — estimación de comida por foto (IA)
 
-Edge Function que recibe una foto + descripción y devuelve `{ label, kcal, protein, carbs, fat, confidence }`
-usando un modelo de visión. Por defecto usa **Gemini (tier gratis)** de Google AI Studio.
-La clave vive solo en el servidor; nunca llega al cliente.
+Edge Function que recibe una foto + descripción y devuelve
+`{ reasoning, label, grams, kcal, protein, carbs, fat, confidence }` usando modelos de visión.
 
-El endpoint es **compatible-OpenAI**, así que cambiar de proveedor (Groq, Qwen, GLM…) es solo
-cambiar tres secretos, sin tocar el código.
+**Fallback multi-proveedor**: prueba los modelos de **Groq** y de **Gemini** en orden hasta
+que uno responda. Son dos tiers GRATIS independientes, así que si a uno se le acaba la cuota,
+salta al otro automáticamente. Las claves viven solo en el servidor; nunca llegan al cliente.
 
-## Puesta en marcha (una vez)
+## Puesta en marcha
 
-1. **Clave gratis de Gemini**: entra en https://aistudio.google.com/apikey (sin tarjeta),
-   crea una API key y guárdala como secreto:
+Basta con tener **al menos una** clave. Recomendado: las dos, para máxima fiabilidad.
 
-   ```sh
-   supabase secrets set AI_API_KEY=<tu_clave_de_gemini>
-   ```
-
-   Con esto ya apunta a Gemini por defecto. Opcionalmente puedes fijar modelo/endpoint:
+1. **Groq (gratis, sin tarjeta)** — https://console.groq.com/keys → crea una API key:
 
    ```sh
-   supabase secrets set AI_MODEL=gemini-2.5-flash
-   supabase secrets set AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+   supabase secrets set GROQ_API_KEY=<tu_clave_de_groq>
    ```
 
-2. Desplegar la función:
+2. **Gemini (gratis, sin tarjeta)** — https://aistudio.google.com/apikey:
 
    ```sh
-   supabase functions deploy estimate-meal
+   supabase secrets set GEMINI_API_KEY=<tu_clave_de_gemini>
+   ```
+   (Se sigue aceptando `AI_API_KEY` como clave de Gemini por compatibilidad.)
+
+3. Desplegar:
+
+   ```sh
+   supabase functions deploy estimate-meal --project-ref <ref> --no-verify-jwt
    ```
 
-3. Activar el botón "Foto (IA)" en la app añadiendo a `.env.production` (y `.env.local` para dev):
+4. Activar el botón "Foto (IA)": `VITE_AI_PHOTO=1` en `.env.production` y push a `main`.
 
-   ```
-   VITE_AI_PHOTO=1
-   ```
+Orden por defecto: **Groq primero** (rápido, pool fresco), **Gemini de respaldo**. Se puede
+ajustar la lista de modelos con `GROQ_MODELS` / `GEMINI_MODELS` (CSV) sin tocar código.
 
-   y volviendo a desplegar el front (push a `main`).
+## Modelos por defecto
 
-Sin estos pasos, la app funciona igual: el botón "Foto" simplemente no aparece y se usan
-las otras vías (manual, buscador, código de barras, comidas).
+| Proveedor | Modelos |
+|---|---|
+| Groq | `meta-llama/llama-4-scout-17b-16e-instruct`, `meta-llama/llama-4-maverick-17b-128e-instruct` |
+| Gemini | `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash` |
 
-## Cambiar de proveedor (plan B)
+## Notas
 
-Todos exponen endpoint compatible-OpenAI. Para cambiar, ajusta los secretos:
-
-| Proveedor | `AI_BASE_URL` | `AI_MODEL` (ejemplo) |
-|---|---|---|
-| Gemini (Google) | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash` |
-| Groq | `https://api.groq.com/openai/v1` | `llama-3.2-90b-vision-preview` |
-| Qwen (Alibaba) | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` | `qwen-vl-plus` |
-| Zhipu GLM | `https://open.bigmodel.cn/api/paas/v4` | `glm-4v-flash` |
-
-Verifica el nombre de modelo y el tier gratis de cada uno antes de cambiar
-(lista útil: https://github.com/cheahjs/free-llm-api-resources).
-
-## Coste y privacidad
-
-- **Gratis** en el tier gratis de Gemini (~1.500 peticiones/día, sin tarjeta).
-- La foto se reescala a ≤1024 px en el cliente antes de enviarse (menos payload).
-- ⚠️ El tier gratis de Google puede usar los datos para mejorar sus modelos. Si no quieres eso,
-  usa un proveedor con política distinta o pásate a un modelo en el navegador.
+- La foto se reescala a ≤1024 px en el cliente antes de enviarse.
+- En caso de error, la función devuelve el detalle real del proveedor para diagnóstico.
+- ⚠️ Los tiers gratis pueden usar los datos para mejorar sus modelos y tienen límites de ritmo
+  (por minuto y por día). Para uso personal (unas pocas fotos al día) van sobrados.

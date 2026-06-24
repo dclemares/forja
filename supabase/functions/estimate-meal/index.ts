@@ -1,19 +1,18 @@
 // Edge Function (Deno): estima calorías y macros de una comida a partir de una
-// foto + descripción, usando un modelo de visión vía endpoint compatible-OpenAI.
+// foto + descripción, usando modelos de visión vía endpoints compatibles-OpenAI.
 //
-// Por defecto usa Gemini (tier GRATIS de Google AI Studio). Como el endpoint es
-// compatible-OpenAI, cambiar de proveedor (Groq, Qwen, GLM…) es solo config:
-// basta con cambiar los secretos AI_BASE_URL / AI_MODEL / AI_API_KEY.
+// FALLBACK MULTI-PROVEEDOR: prueba los modelos de Groq y de Gemini en orden hasta
+// que uno responda. Dos tiers GRATIS independientes = mucha más fiabilidad (si a
+// uno se le acaba la cuota, salta al otro solo).
 //
-// Secretos (Supabase):
-//   supabase secrets set AI_API_KEY=<tu_clave_gratis>
-//   # opcionales (con estos valores por defecto apunta a Gemini):
-//   supabase secrets set AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
-//   supabase secrets set AI_MODEL=gemini-2.5-flash
-// Despliegue:
-//   supabase functions deploy estimate-meal
+// Secretos (Supabase) — basta con tener al menos una clave:
+//   supabase secrets set GROQ_API_KEY=<clave_gratis_de_groq>      # console.groq.com
+//   supabase secrets set GEMINI_API_KEY=<clave_gratis_de_gemini>  # aistudio.google.com
+//   # (AI_API_KEY se sigue aceptando como clave de Gemini, por compatibilidad)
+//   # opcionales: GROQ_MODELS / GEMINI_MODELS para cambiar la lista de modelos.
+// Despliegue:  supabase functions deploy estimate-meal
 //
-// La clave vive SOLO aquí (servidor); nunca llega al cliente.
+// Las claves viven SOLO aquí (servidor); nunca llegan al cliente.
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -24,13 +23,33 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } })
 
-const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
-// Cadena de modelos: si el primero está saturado (503), prueba el siguiente.
-// Cada modelo tiene capacidad/cuota separada, así que el fallback sube mucho el éxito.
-const MODELS = (Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-2.0-flash-lite')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean)
+const splitList = (s: string): string[] => s.split(',').map((x) => x.trim()).filter(Boolean)
+
+interface Provider {
+  name: string
+  baseUrl: string
+  key?: string
+  models: string[]
+}
+
+// Orden de proveedores: Groq primero (pool fresco, rápido), Gemini de respaldo.
+const PROVIDERS: Provider[] = [
+  {
+    name: 'groq',
+    baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
+    key: Deno.env.get('GROQ_API_KEY'),
+    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct,meta-llama/llama-4-maverick-17b-128e-instruct'),
+  },
+  {
+    name: 'gemini',
+    baseUrl: (Deno.env.get('GEMINI_BASE_URL') ?? Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, ''),
+    key: Deno.env.get('GEMINI_API_KEY') ?? Deno.env.get('AI_API_KEY'),
+    models: splitList(Deno.env.get('GEMINI_MODELS') ?? Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash'),
+  },
+]
+
+// Lista plana de intentos (proveedor + modelo), solo de proveedores que tengan clave.
+const ATTEMPTS = PROVIDERS.filter((p) => p.key).flatMap((p) => p.models.map((model) => ({ provider: p, model })))
 
 const SYSTEM = [
   'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
@@ -54,8 +73,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405)
 
-  const key = Deno.env.get('AI_API_KEY') ?? Deno.env.get('GEMINI_API_KEY')
-  if (!key) return json({ error: 'Falta AI_API_KEY en el servidor.' }, 500)
+  if (ATTEMPTS.length === 0) return json({ error: 'Falta una clave de IA en el servidor (GROQ_API_KEY o GEMINI_API_KEY).' }, 500)
 
   let body: { imageBase64?: string; mediaType?: string; note?: string }
   try {
@@ -82,20 +100,20 @@ Deno.serve(async (req: Request) => {
   try {
     let d: { choices?: { message?: { content?: string } }[] } | null = null
     let lastInfo = ''
-    // Una llamada por modelo (sin reintento interno, para no quemar cuota). Si un
-    // modelo falla, pasa al siguiente: cada uno tiene capacidad/cuota separada.
-    for (const model of MODELS) {
-      const r = await fetch(`${BASE_URL}/chat/completions`, {
+    // Una llamada por (proveedor, modelo): si falla, pasa al siguiente. Groq y
+    // Gemini tienen cuota/capacidad independientes → mucha más fiabilidad.
+    for (const { provider, model } of ATTEMPTS) {
+      const r = await fetch(`${provider.baseUrl}/chat/completions`, {
         method: 'POST',
-        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+        headers: { authorization: `Bearer ${provider.key}`, 'content-type': 'application/json' },
         body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1200, response_format: { type: 'json_object' }, messages }),
       })
       if (r.ok) {
         d = await r.json().catch(() => ({}))
         break
       }
-      const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160)
-      lastInfo += `[${model} ${r.status}: ${raw}] `
+      const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 140)
+      lastInfo += `[${provider.name}/${model} ${r.status}: ${raw}] `
     }
     if (!d) return json({ error: 'Los modelos gratis están saturados ahora mismo. Inténtalo de nuevo en unos segundos.', detail: lastInfo }, 503)
 
