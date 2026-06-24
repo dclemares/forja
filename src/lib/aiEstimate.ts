@@ -17,6 +17,8 @@ export interface MealItem {
 }
 
 export interface MealEstimate {
+  provider: string
+  description: string
   reasoning: string
   label: string
   items: MealItem[]

@@ -9,6 +9,8 @@ const num = (s: string): number => {
   return Number.isFinite(n) && n >= 0 ? n : 0
 }
 
+const providerLabel = (p: string): string => (p === 'groq' ? 'Groq' : p === 'gemini' ? 'Gemini' : p)
+
 type Phase = 'input' | 'loading' | 'result' | 'error'
 
 export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macros, grams: number) => void }) {
@@ -19,7 +21,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [items, setItems] = useState<MealItem[]>([])
-  const [est, setEst] = useState<{ reasoning: string; label: string; grams: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ reasoning: '', label: '', grams: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
+  const [est, setEst] = useState<{ provider: string; description: string; reasoning: string; label: string; grams: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ provider: '', description: '', reasoning: '', label: '', grams: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
 
   const onFile = async (file: File) => {
     const scaled = await fileToScaledBase64(file)
@@ -33,7 +35,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     try {
       const r: MealEstimate = await estimateMeal({ imageBase64: payload.data, mediaType: payload.mediaType, note })
       setItems(r.items ?? [])
-      setEst({ reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
+      setEst({ provider: r.provider, description: r.description, reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
       setPhase('result')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo estimar')
@@ -69,12 +71,18 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
             {preview && <img src={preview} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 12, flex: 'none' }} />}
             <div style={{ flex: 1, minWidth: 0 }}>
               <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" value={est.label} onChange={(e) => setEst((s) => ({ ...s, label: e.target.value }))} style={{ ...inp, fontWeight: 700 }} />
-              <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>Estimación IA · confianza {est.confidence || '—'} · ajústala si hace falta</div>
+              <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>Estimación IA{est.provider ? ` · vía ${providerLabel(est.provider)}` : ''} · confianza {est.confidence || '—'}</div>
             </div>
           </div>
+          {est.description && (
+            <div style={reasoningBox}>
+              <div style={reasoningTitle}>👀 Lo que ve</div>
+              {est.description}
+            </div>
+          )}
           {est.reasoning && (
             <div style={reasoningBox}>
-              <div style={reasoningTitle}>🔎 Lo que interpreta la IA</div>
+              <div style={reasoningTitle}>⚖️ Cómo calcula los pesos</div>
               {est.reasoning}
             </div>
           )}

@@ -56,11 +56,12 @@ const SYSTEM = [
   'Combina ambas: la FOTO te da el tamaño y el volumen de la porción, y la DESCRIPCIÓN del usuario te dice qué es y cómo está cocinado.',
   'ESCALA: para calcular las cantidades, fíjate en el TAMAÑO y el VOLUMEN usando objetos de referencia visibles para calibrar. Tamaños típicos: moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, vaso ≈ 8 cm de alto, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm. Si la descripción menciona un objeto y su medida (p. ej. "un mando de 16 cm"), úsalo como regla.',
   'Con esa escala, estima las dimensiones y el volumen de cada alimento y, según su densidad típica, deduce su peso en gramos.',
-  'En "reasoning" RAZONA en español (2-5 frases): qué referencia usas y qué escala deduces, el tamaño/volumen aproximado de cada alimento, su peso en gramos, y cómo llegas a las calorías. Empieza con "Veo…". Ten en cuenta aceites, salsas y rebozados, que suman bastante.',
+  'En "description" DESCRIBE en español lo que ves en el plato: los alimentos y su presentación, en 1-3 frases, SIN cálculos. Empieza con "Veo…".',
+  'En "reasoning" explica en español CÓMO CALCULAS LOS PESOS (2-5 frases): qué objeto de referencia usas y qué escala deduces, el tamaño/volumen de cada alimento, su densidad típica y el peso en gramos resultante. Ten en cuenta aceites, salsas y rebozados, que suman bastante.',
   'DESGLOSA el plato en sus ingredientes principales. En "items" devuelve un array con un objeto por ingrediente (p. ej. arroz, pollo, aceite…), cada uno con su nombre, gramos, kcal y macros para la cantidad que se ve.',
   'Los totales (grams, kcal, protein, carbs, fat) deben ser la SUMA de los items. Todo para la ración COMPLETA que se ve (no por 100 g).',
   'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
-  '{"reasoning": string, "label": string (nombre corto del plato en español), "items": [{"name": string, "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number}], "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
+  '{"description": string, "reasoning": string, "label": string (nombre corto del plato en español), "items": [{"name": string, "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number}], "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
   'Sin texto adicional, sin markdown, solo el JSON.',
 ].join('\n')
 
@@ -100,6 +101,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     let d: { choices?: { message?: { content?: string } }[] } | null = null
+    let used: { provider: string; model: string } | null = null
     let lastInfo = ''
     // Una llamada por (proveedor, modelo): si falla, pasa al siguiente. Groq y
     // Gemini tienen cuota/capacidad independientes → mucha más fiabilidad.
@@ -111,6 +113,7 @@ Deno.serve(async (req: Request) => {
       })
       if (r.ok) {
         d = await r.json().catch(() => ({}))
+        used = { provider: provider.name, model }
         break
       }
       const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 140)
@@ -153,6 +156,9 @@ Deno.serve(async (req: Request) => {
 
     return json(
       {
+        provider: used?.provider ?? '',
+        model: used?.model ?? '',
+        description: String(parsed.description ?? '').slice(0, 500),
         reasoning: String(parsed.reasoning ?? '').slice(0, 900),
         label: String(parsed.label ?? 'Comida').slice(0, 80),
         items,
