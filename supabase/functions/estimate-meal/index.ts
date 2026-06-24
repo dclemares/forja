@@ -44,7 +44,7 @@ const PROVIDERS: Provider[] = [
     name: 'groq',
     baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
     key: Deno.env.get('GROQ_API_KEY'),
-    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct,meta-llama/llama-4-maverick-17b-128e-instruct'),
+    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct'),
   },
 ]
 
