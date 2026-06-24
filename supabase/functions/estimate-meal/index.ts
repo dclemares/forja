@@ -58,7 +58,7 @@ const SYSTEM = [
   'Con esa escala, estima las dimensiones y el volumen de cada alimento y, según su densidad típica, deduce su peso en gramos.',
   'En "description" DESCRIBE en español lo que ves en el plato: los alimentos y su presentación, en 1-3 frases, SIN cálculos. Empieza con "Veo…".',
   'En "reasoning" explica en español CÓMO CALCULAS LOS PESOS (2-5 frases): qué objeto de referencia usas y qué escala deduces, el tamaño/volumen de cada alimento, su densidad típica y el peso en gramos resultante. Ten en cuenta aceites, salsas y rebozados, que suman bastante.',
-  'DESGLOSA el plato en sus ingredientes principales. En "items" devuelve un array con un objeto por ingrediente (p. ej. arroz, pollo, aceite…), cada uno con su nombre, gramos, kcal y macros para la cantidad que se ve.',
+  'DESGLOSA el plato en sus ingredientes principales. En "items" devuelve un array con un objeto por ingrediente (p. ej. arroz, pollo, aceite…), cada uno con su nombre, gramos, kcal y macros para la cantidad que se ve. Devuelve SIEMPRE al menos un ingrediente; nunca dejes "items" vacío.',
   'Los totales (grams, kcal, protein, carbs, fat) deben ser la SUMA de los items. Todo para la ración COMPLETA que se ve (no por 100 g).',
   'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
   '{"description": string, "reasoning": string, "label": string (nombre corto del plato en español), "items": [{"name": string, "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number}], "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
