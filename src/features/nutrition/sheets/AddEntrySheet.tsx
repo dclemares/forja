@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Camera, ChevronRight, Globe, Plus, ScanBarcode, Search, Zap } from 'lucide-react'
+import { Camera, ChevronRight, Globe, Plus, ScanBarcode, Search } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { PillButton } from '@/components/ui/PillButton'
 import { Stepper } from '@/components/ui/Stepper'
@@ -13,12 +13,8 @@ import type { Food, MealSlot } from '@/lib/types'
 import { FoodForm } from './FoodForm'
 import { PhotoEstimate } from './PhotoEstimate'
 
-type View = 'menu' | 'quick' | 'pickFood' | 'createFood' | 'grams' | 'search' | 'scan' | 'notFound' | 'photo'
+type View = 'menu' | 'pickFood' | 'createFood' | 'grams' | 'search' | 'scan' | 'notFound' | 'photo'
 
-const num = (s: string): number => {
-  const n = parseFloat(s.replace(',', '.'))
-  return Number.isFinite(n) && n >= 0 ? n : 0
-}
 const slotLabel: Record<MealSlot, string> = { desayuno: 'Desayuno', comida: 'Comida', cena: 'Cena', snack: 'Snack' }
 
 export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; onClose: () => void; slot: MealSlot; date: string }) {
@@ -48,19 +44,12 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
     <Sheet open={open} onClose={onClose} title={`Añadir · ${slotLabel[slot]}`}>
       {view === 'menu' && (
         <div style={{ paddingBottom: 8 }}>
-          <MenuRow icon={<Zap size={19} />} title="Ración rápida" subtitle="Solo calorías (y macros opcionales)" onClick={() => setView('quick')} />
           {aiPhotoEnabled() && <MenuRow icon={<Camera size={19} />} title="Foto (IA)" subtitle="Estima por foto cuando comes fuera" onClick={() => setView('photo')} />}
           {canScan && <MenuRow icon={<ScanBarcode size={19} />} title="Escanear código" subtitle="Lee el código de barras del producto" onClick={() => setView('scan')} />}
           <MenuRow icon={<Globe size={19} />} title="Buscar online" subtitle="Base de datos Open Food Facts" onClick={() => setView('search')} />
           <MenuRow icon={<Search size={19} />} title="Mis alimentos" subtitle={`${state.foods.length} guardados`} onClick={() => setView('pickFood')} />
           <MenuRow icon={<Plus size={19} />} title="Crear alimento" subtitle="Alta manual por 100 g" onClick={() => setView('createFood')} />
         </div>
-      )}
-
-      {view === 'quick' && (
-        <QuickForm
-          onSave={(label, macros) => { addDiaryEntry({ date, slot, label, macros, source: 'quick' }); onClose() }}
-        />
       )}
 
       {view === 'search' && (
@@ -127,7 +116,7 @@ function OnlineSearch({ onPick }: { onPick: (off: OffFood) => void }) {
 
   return (
     <div style={{ paddingBottom: 8 }}>
-      <input autoFocus placeholder="Buscar producto (p. ej. yogur griego)…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+      <input autoFocus autoComplete="off" placeholder="Buscar producto (p. ej. yogur griego)…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
       {loading && <div style={{ color: 'var(--ink-faint)', fontSize: 14, padding: '12px 4px' }}>Buscando…</div>}
       {!loading && results.map((f, i) => (
         <button key={(f.code ?? '') + i} style={rowBtn} onClick={() => onPick(f)}>
@@ -156,34 +145,12 @@ function MenuRow({ icon, title, subtitle, onClick }: { icon: React.ReactNode; ti
   )
 }
 
-function QuickForm({ onSave }: { onSave: (label: string, macros: { kcal: number; protein: number; carbs: number; fat: number }) => void }) {
-  const [label, setLabel] = useState('')
-  const [kcal, setKcal] = useState('')
-  const [protein, setProtein] = useState('')
-  const [carbs, setCarbs] = useState('')
-  const [fat, setFat] = useState('')
-  return (
-    <div style={{ padding: '4px 2px 12px' }}>
-      <input autoFocus placeholder="Qué comiste (p. ej. menú del día)" value={label} onChange={(e) => setLabel(e.target.value)} style={inp} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 12 }}>
-        <Field label="Calorías (kcal)" value={kcal} onChange={setKcal} />
-        <Field label="Proteína (g) · opc." value={protein} onChange={setProtein} />
-        <Field label="Carbos (g) · opc." value={carbs} onChange={setCarbs} />
-        <Field label="Grasa (g) · opc." value={fat} onChange={setFat} />
-      </div>
-      <PillButton full size="lg" style={{ marginTop: 16 }} onClick={() => { if (!label.trim() && !num(kcal)) return; onSave(label.trim() || 'Estimación rápida', { kcal: num(kcal), protein: num(protein), carbs: num(carbs), fat: num(fat) }) }}>
-        Añadir
-      </PillButton>
-    </div>
-  )
-}
-
 function FoodPicker({ foods, onPick, onCreate }: { foods: Food[]; onPick: (f: Food) => void; onCreate: () => void }) {
   const [q, setQ] = useState('')
   const list = foods.filter((f) => `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).sort((a, b) => a.name.localeCompare(b.name))
   return (
     <div style={{ paddingBottom: 8 }}>
-      <input autoFocus placeholder="Buscar en tus alimentos…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+      <input autoComplete="off" placeholder="Buscar en tus alimentos…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
       {list.map((f) => (
         <button key={f.id} style={rowBtn} onClick={() => onPick(f)}>
           <span style={{ flex: 1 }}>
@@ -224,15 +191,6 @@ function GramsStep({ food, onAdd }: { food: Food; onAdd: (grams: number) => void
       </div>
       <PillButton full size="lg" icon={<Plus size={18} />} style={{ marginTop: 16 }} onClick={() => onAdd(grams)}>Añadir al diario</PillButton>
     </div>
-  )
-}
-
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
-      {label}
-      <input inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
-    </label>
   )
 }
 

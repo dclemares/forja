@@ -40,7 +40,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   return (
     <label style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
       {label}
-      <input inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
+      <input autoComplete="off" inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
     </label>
   )
 }

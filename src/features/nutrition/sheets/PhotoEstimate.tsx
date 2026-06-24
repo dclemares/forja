@@ -41,14 +41,14 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
 
   return (
     <div style={{ padding: '4px 2px 12px' }}>
-      <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
+      <input autoComplete="off" ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
 
       {(phase === 'input' || phase === 'error') && (
         <>
           <button type="button" onClick={() => fileRef.current?.click()} style={dropZone}>
             {preview ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} /> : <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--ink-soft)' }}><Camera size={30} /> Toca para hacer/elegir una foto</span>}
           </button>
-          <input placeholder="¿Qué lleva? (p. ej. paella grande, ración generosa)" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
+          <input autoComplete="off" placeholder="¿Qué lleva? (p. ej. paella grande, ración generosa)" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
           {phase === 'error' && <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 10 }}>{error}</div>}
           <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: payload ? 1 : 0.5 }} disabled={!payload} onClick={run}>Estimar con IA</PillButton>
         </>
@@ -66,7 +66,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             {preview && <img src={preview} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 12, flex: 'none' }} />}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <input value={est.label} onChange={(e) => setEst((s) => ({ ...s, label: e.target.value }))} style={{ ...inp, fontWeight: 700 }} />
+              <input autoComplete="off" value={est.label} onChange={(e) => setEst((s) => ({ ...s, label: e.target.value }))} style={{ ...inp, fontWeight: 700 }} />
               <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>Estimación IA · confianza {est.confidence || '—'} · ajústala si hace falta</div>
             </div>
           </div>
@@ -87,7 +87,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   return (
     <label style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
       {label}
-      <input inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
+      <input autoComplete="off" inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
     </label>
   )
 }
