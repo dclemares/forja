@@ -12,12 +12,16 @@ const num = (s: string): number => {
 const providerLabel = (p: string): string => (p === 'groq' ? 'Groq' : p === 'gemini' ? 'Gemini' : p)
 
 type Phase = 'input' | 'loading' | 'result' | 'error'
+type Shot = { data: string; mediaType: string } | null
 
 export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macros, grams: number) => void }) {
-  const fileRef = useRef<HTMLInputElement>(null)
+  const fileTop = useRef<HTMLInputElement>(null)
+  const fileSide = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<Phase>('input')
-  const [preview, setPreview] = useState('')
-  const [payload, setPayload] = useState<{ data: string; mediaType: string } | null>(null)
+  const [topPreview, setTopPreview] = useState('')
+  const [topShot, setTopShot] = useState<Shot>(null)
+  const [sidePreview, setSidePreview] = useState('')
+  const [sideShot, setSideShot] = useState<Shot>(null)
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [items, setItems] = useState<MealItem[]>([])
@@ -42,17 +46,22 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   )
   const setGramAt = (i: number, v: string) => setGramsEd((arr) => arr.map((g, j) => (j === i ? v : g)))
 
-  const onFile = async (file: File) => {
+  const onFile = async (file: File, which: 'top' | 'side') => {
     const scaled = await fileToScaledBase64(file)
-    setPreview(scaled.previewUrl)
-    setPayload({ data: scaled.data, mediaType: scaled.mediaType })
+    if (which === 'top') {
+      setTopPreview(scaled.previewUrl)
+      setTopShot({ data: scaled.data, mediaType: scaled.mediaType })
+    } else {
+      setSidePreview(scaled.previewUrl)
+      setSideShot({ data: scaled.data, mediaType: scaled.mediaType })
+    }
   }
 
   const run = async () => {
-    if (!payload) return
+    if (!topShot || !sideShot) return
     setPhase('loading')
     try {
-      const r: MealEstimate = await estimateMeal({ imageBase64: payload.data, mediaType: payload.mediaType, note })
+      const r: MealEstimate = await estimateMeal({ imageBase64: topShot.data, mediaType: topShot.mediaType, imageBase64Side: sideShot.data, mediaTypeSide: sideShot.mediaType, note })
       setItems(r.items ?? [])
       setGramsEd((r.items ?? []).map((it) => String(Math.round(it.grams))))
       setEst({ provider: r.provider, description: r.description, reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
@@ -63,32 +72,42 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     }
   }
 
+  const ready = !!(topShot && sideShot)
+
   return (
     <div style={{ padding: '4px 2px 12px' }}>
-      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
+      <input autoComplete="off" ref={fileTop} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f, 'top') }} />
+      <input autoComplete="off" ref={fileSide} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f, 'side') }} />
 
       {(phase === 'input' || phase === 'error') && (
         <>
-          <button type="button" onClick={() => fileRef.current?.click()} style={dropZone}>
-            {preview ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} /> : <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--ink-soft)' }}><Camera size={30} /> Toca para hacer/elegir una foto</span>}
-          </button>
-          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="¿Qué lleva? Y si hay algo de referencia (moneda, mando…), dilo" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
+          <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 9, lineHeight: 1.4 }}>
+            Haz <b>dos fotos</b> del mismo plato: una <b>cenital</b> (desde arriba) y otra <b>lateral</b> (de lado). La lateral deja ver el grosor, que es lo que más cuenta para el peso.
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Slot label="Cenital · desde arriba" preview={topPreview} onClick={() => fileTop.current?.click()} />
+            <Slot label="Lateral · de lado" preview={sidePreview} onClick={() => fileSide.current?.click()} />
+          </div>
+          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="¿Qué lleva? Y si hay algo de referencia (moneda, cubierto…), dilo" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
           {phase === 'error' && <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 10 }}>{error}</div>}
-          <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: payload ? 1 : 0.5 }} disabled={!payload} onClick={run}>Estimar con IA</PillButton>
+          <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: ready ? 1 : 0.5 }} disabled={!ready} onClick={run}>{ready ? 'Estimar con IA' : 'Faltan fotos (cenital + lateral)'}</PillButton>
         </>
       )}
 
       {phase === 'loading' && (
         <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--ink-soft)' }}>
-          {preview && <img src={preview} alt="" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 14, marginBottom: 14 }} />}
-          <div style={{ fontWeight: 700 }}>Analizando la foto…</div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 14 }}>
+            {topPreview && <img src={topPreview} alt="" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 12 }} />}
+            {sidePreview && <img src={sidePreview} alt="" style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 12 }} />}
+          </div>
+          <div style={{ fontWeight: 700 }}>Analizando las dos fotos…</div>
         </div>
       )}
 
       {phase === 'result' && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            {preview && <img src={preview} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 12, flex: 'none' }} />}
+            {topPreview && <img src={topPreview} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 12, flex: 'none' }} />}
             <div style={{ flex: 1, minWidth: 0 }}>
               <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" value={est.label} onChange={(e) => setEst((s) => ({ ...s, label: e.target.value }))} style={{ ...inp, fontWeight: 700 }} />
               <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>Estimación IA{est.provider ? ` · vía ${providerLabel(est.provider)}` : ''} · confianza {est.confidence || '—'}</div>
@@ -151,6 +170,20 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   )
 }
 
+function Slot({ label, preview, onClick }: { label: string; preview: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} style={slotZone}>
+      {preview ? (
+        <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 11 }} />
+      ) : (
+        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--ink-soft)', fontSize: 12, fontWeight: 700, textAlign: 'center', padding: 8 }}>
+          <Camera size={26} />{label}
+        </span>
+      )}
+    </button>
+  )
+}
+
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
@@ -165,4 +198,4 @@ const reasoningTitle: React.CSSProperties = { fontSize: 11, fontWeight: 800, col
 const itemRow: React.CSSProperties = { padding: '8px 2px', borderBottom: '1px solid var(--hairline)' }
 const gramsInput: React.CSSProperties = { width: 66, flex: 'none', textAlign: 'center', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 9, padding: '6px 4px', color: 'var(--ink)', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 1px 3px rgba(80,50,20,.2)' }
 const inp: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
-const dropZone: React.CSSProperties = { width: '100%', height: 180, borderRadius: 14, border: '2px dashed #9A6A3A', background: 'rgba(120,80,30,.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', fontSize: 14, overflow: 'hidden', padding: 0 }
+const slotZone: React.CSSProperties = { flex: 1, height: 150, borderRadius: 14, border: '2px dashed #9A6A3A', background: 'rgba(120,80,30,.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', overflow: 'hidden', padding: 0 }

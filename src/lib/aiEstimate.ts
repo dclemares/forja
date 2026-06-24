@@ -50,7 +50,7 @@ export async function fileToScaledBase64(file: File, maxPx = 1024): Promise<{ da
   return { data: dataUrl.split(',')[1] ?? '', mediaType: 'image/jpeg', previewUrl: dataUrl }
 }
 
-export async function estimateMeal(input: { imageBase64: string; mediaType: string; note: string }): Promise<MealEstimate> {
+export async function estimateMeal(input: { imageBase64: string; mediaType: string; imageBase64Side?: string; mediaTypeSide?: string; note: string }): Promise<MealEstimate> {
   const r = await fetch(`${url}/functions/v1/estimate-meal`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${anon ?? ''}`, apikey: anon ?? '' },

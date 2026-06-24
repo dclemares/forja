@@ -52,14 +52,15 @@ const PROVIDERS: Provider[] = [
 const ATTEMPTS = PROVIDERS.filter((p) => p.key).flatMap((p) => p.models.map((model) => ({ provider: p, model })))
 
 const SYSTEM = [
-  'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
-  'Combina ambas: la FOTO te da el tamaño y el volumen de la porción, y la DESCRIPCIÓN del usuario te dice qué es y cómo está cocinado.',
-  'ESCALA: para calcular las cantidades, fíjate en el TAMAÑO y el VOLUMEN usando objetos de referencia visibles para calibrar. Tamaños típicos: moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, vaso ≈ 8 cm de alto, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm. Si la descripción menciona un objeto y su medida (p. ej. "un mando de 16 cm"), úsalo como regla.',
-  'Con esa escala, estima las dimensiones y el volumen de cada alimento y, según su densidad típica, deduce su peso en gramos.',
-  'En "description" DESCRIBE en español lo que ves en el plato: los alimentos y su presentación, en 1-3 frases, SIN cálculos. Empieza con "Veo…".',
-  'En "reasoning" explica en español CÓMO CALCULAS LOS PESOS (2-5 frases): qué objeto de referencia usas y qué escala deduces, el tamaño/volumen de cada alimento, su densidad típica y el peso en gramos resultante. Ten en cuenta aceites, salsas y rebozados, que suman bastante.',
-  'DESGLOSA el plato en sus ingredientes principales. En "items" devuelve un array con un objeto por ingrediente (p. ej. arroz, pollo, aceite…), cada uno con su nombre, gramos, kcal y macros para la cantidad que se ve. Devuelve SIEMPRE al menos un ingrediente; nunca dejes "items" vacío.',
-  'Los totales (grams, kcal, protein, carbs, fat) deben ser la SUMA de los items. Todo para la ración COMPLETA que se ve (no por 100 g).',
+  'Eres un estimador nutricional a partir de DOS fotos del mismo plato: una CENITAL (desde arriba) y otra LATERAL (de lado), más la descripción del usuario. Sigue este método sin saltarte pasos.',
+  '1) IDENTIFICA cada alimento e indica si está CRUDO o COCIDO. Clave: arroz, pasta y legumbre CRUDOS tienen ~3× más kcal por gramo que cocidos; no los confundas.',
+  '2) ESCALA: busca un objeto de tamaño conocido en las fotos y úsalo de referencia (moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm). Si dudas cuál es, asume el caso intermedio y dilo.',
+  '3) CALCULA, no estimes a ojo: usa la foto CENITAL para el ÁREA y la LATERAL para el GROSOR. peso ≈ área(cm²) × grosor(cm) × densidad(g/cm³). Densidades aprox.: arroz/legumbre crudos ~0,85 · arroz/pasta cocidos ~0,8 · pan aireado ~0,3 · carne/pescado ~1,05 · verdura ~0,6 · salsa/aceite ~0,95.',
+  '4) SANITY CHECK: contrasta con una ración normal (arroz seco 60-80 g, pasta seca 70-100 g, pan 50-90 g, pechuga 150-250 g, guarnición de verdura 100-200 g). Si te sale el doble de lo típico sin motivo claro, probablemente te has pasado: corrige.',
+  'En "description" describe en 1-2 frases lo que ves (alimentos, y si están crudos o cocidos), SIN cálculos. Empieza con "Veo…".',
+  'En "reasoning" explica el cálculo en 2-5 frases: la escala usada, el área (por la cenital) y el grosor (por la lateral), la densidad y el peso resultante, y el RANGO de incertidumbre. Si una foto falta o no se aprecia el grosor, dilo y usa "confidence":"baja".',
+  'DESGLOSA en "items": un objeto por ingrediente (nombre, gramos, kcal y macros), con tu MEJOR estimación (el centro del rango) para la cantidad que se ve. Devuelve SIEMPRE al menos un ingrediente; nunca lo dejes vacío.',
+  'Los totales (grams, kcal, protein, carbs, fat) deben ser la SUMA de los items. Todo para la ración COMPLETA (no por 100 g).',
   'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
   '{"description": string, "reasoning": string, "label": string (nombre corto del plato en español), "items": [{"name": string, "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number}], "grams": number, "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
   'Sin texto adicional, sin markdown, solo el JSON.',
@@ -77,7 +78,7 @@ Deno.serve(async (req: Request) => {
 
   if (ATTEMPTS.length === 0) return json({ error: 'Falta una clave de IA en el servidor (GROQ_API_KEY o GEMINI_API_KEY).' }, 500)
 
-  let body: { imageBase64?: string; mediaType?: string; note?: string }
+  let body: { imageBase64?: string; mediaType?: string; imageBase64Side?: string; mediaTypeSide?: string; note?: string }
   try {
     body = await req.json()
   } catch {
@@ -86,16 +87,20 @@ Deno.serve(async (req: Request) => {
   if (!body.imageBase64) return json({ error: 'Falta la imagen.' }, 400)
 
   const note = (body.note ?? '').trim()
-  const dataUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
+  const topUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
+  const sideUrl = body.imageBase64Side ? `data:${body.mediaTypeSide || 'image/jpeg'};base64,${body.imageBase64Side}` : null
+
+  const userContent: Array<Record<string, unknown>> = [
+    { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Foto 1 = CENITAL (desde arriba)${sideUrl ? '. Foto 2 = LATERAL (de lado)' : ' (no se aportó foto lateral)'}. Estima la ración.` },
+    { type: 'image_url', image_url: { url: topUrl } },
+  ]
+  if (sideUrl) userContent.push({ type: 'image_url', image_url: { url: sideUrl } })
 
   const messages = [
     { role: 'system', content: SYSTEM },
     {
       role: 'user',
-      content: [
-        { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
-        { type: 'image_url', image_url: { url: dataUrl } },
-      ],
+      content: userContent,
     },
   ]
 
