@@ -1,7 +1,6 @@
 import { formatDayMonth } from '@/lib/format'
 
 const ACCENT = '#C8861F'
-const TREND = '#6E4423'
 const LABEL = 'rgba(60,38,16,.6)'
 const AXIS = 'rgba(60,38,16,.78)'
 const VALUE = '#5A3A18'
@@ -32,11 +31,13 @@ export function TrendChart({
   points,
   unit,
   zeroBased = true,
+  avg,
   height = 188,
 }: {
   points: TrendPoint[]
   unit: string
   zeroBased?: boolean
+  avg?: number
   height?: number
 }) {
   const W = 320
@@ -82,17 +83,7 @@ export function TrendChart({
   const showDots = n <= 16
   const showVals = n <= 8
   const baseY = y(niceMin)
-  const clampY = (v: number) => Math.max(padT, Math.min(baseY, y(v)))
-  // Recta de tendencia (regresión lineal por mínimos cuadrados sobre el índice).
-  const trend = (() => {
-    if (n < 2) return null
-    let sx = 0, sy = 0, sxy = 0, sxx = 0
-    for (let i = 0; i < n; i++) { sx += i; sy += values[i]; sxy += i * values[i]; sxx += i * i }
-    const denom = n * sxx - sx * sx
-    const slope = denom === 0 ? 0 : (n * sxy - sx * sy) / denom
-    const intercept = (sy - slope * sx) / n
-    return { y0: intercept, y1: intercept + slope * (n - 1) }
-  })()
+  const avgIn = avg != null && avg >= niceMin && avg <= niceMax
 
   return (
     <svg viewBox={`0 0 ${W} ${height}`} width="100%" height={height} role="img" aria-label="Gráfica de evolución">
@@ -107,6 +98,14 @@ export function TrendChart({
       {/* Título del eje Y (qué mide) */}
       <text transform={`translate(11 ${padT + innerH / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fontWeight={700} fill={AXIS}>{unit}</text>
 
+      {/* Media */}
+      {avgIn && (
+        <>
+          <line x1={padL} y1={y(avg!)} x2={W - padR} y2={y(avg!)} stroke={ACCENT} strokeWidth={1.3} strokeDasharray="5 4" opacity={0.65} />
+          <text x={W - padR} y={y(avg!) - 4} textAnchor="end" fontSize={9.5} fontWeight={700} fill={ACCENT}>media {shortNum(avg!)}</text>
+        </>
+      )}
+
       {/* Área + línea */}
       {n > 1 && <polygon points={areaPts} fill={AREA} stroke="none" />}
       {n === 1 && <line x1={padL} y1={y(values[0])} x2={W - padR} y2={y(values[0])} stroke="rgba(200,134,31,.35)" strokeWidth={1.5} strokeDasharray="4 4" />}
@@ -119,14 +118,6 @@ export function TrendChart({
           {showVals && <text x={x(i)} y={y(p.value) - 8} textAnchor="middle" fontSize={10} fontWeight={700} fill={VALUE}>{shortNum(p.value)}</text>}
         </g>
       ))}
-
-      {/* Recta de tendencia */}
-      {trend && (
-        <>
-          <line x1={x(0)} y1={clampY(trend.y0)} x2={x(n - 1)} y2={clampY(trend.y1)} stroke={TREND} strokeWidth={2} strokeDasharray="6 4" opacity={0.85} />
-          <text x={W - padR} y={Math.min(baseY - 3, Math.max(padT + 9, clampY(trend.y1) - 5))} textAnchor="end" fontSize={9.5} fontWeight={700} fill={TREND}>tendencia</text>
-        </>
-      )}
 
       {/* Eje X: línea base + fechas */}
       <line x1={padL} y1={baseY} x2={W - padR} y2={baseY} stroke="rgba(120,80,30,.35)" strokeWidth={1} />
