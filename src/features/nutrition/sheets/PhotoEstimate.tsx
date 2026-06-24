@@ -48,7 +48,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
           <button type="button" onClick={() => fileRef.current?.click()} style={dropZone}>
             {preview ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} /> : <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, color: 'var(--ink-soft)' }}><Camera size={30} /> Toca para hacer/elegir una foto</span>}
           </button>
-          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="¿Qué lleva? (p. ej. paella grande, ración generosa)" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
+          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="¿Qué lleva? Y si hay algo de referencia (moneda, mando…), dilo" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
           {phase === 'error' && <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 10 }}>{error}</div>}
           <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: payload ? 1 : 0.5 }} disabled={!payload} onClick={run}>Estimar con IA</PillButton>
         </>
