@@ -2,14 +2,20 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react'
 import type {
   BodyweightLog,
+  DiaryEntry,
   Exercise,
+  Food,
+  Meal,
+  MealComponent,
   MuscleGroup,
+  NutritionGoal,
   Session,
   WeeklyPlan,
   Workout,
   WorkoutExercise,
   WorkoutSet,
 } from './types'
+import { DEFAULT_NUTRITION_GOAL } from './types'
 import { todayISO, uid } from './format'
 import { buildWorkoutFromSession, buildFreeWorkout, cloneSets, lastSetsForExercise } from './domain/snapshot'
 import { saveState } from './backend'
@@ -21,6 +27,11 @@ export interface AppState {
   workouts: Workout[]
   bodyweight: BodyweightLog[]
   activeWorkoutId: string | null
+  // Nutrición
+  foods: Food[]
+  meals: Meal[]
+  diary: DiaryEntry[]
+  nutritionGoal: NutritionGoal
 }
 
 const STORAGE_KEY = 'forja-state-v1'
@@ -31,6 +42,17 @@ function load(): AppState | null {
     return raw ? (JSON.parse(raw) as AppState) : null
   } catch {
     return null
+  }
+}
+
+/** Rellena campos nuevos en estados guardados antes de existir (p. ej. nutrición). */
+function withDefaults(s: AppState): AppState {
+  return {
+    ...s,
+    foods: s.foods ?? [],
+    meals: s.meals ?? [],
+    diary: s.diary ?? [],
+    nutritionGoal: s.nutritionGoal ?? DEFAULT_NUTRITION_GOAL,
   }
 }
 
@@ -63,6 +85,17 @@ export interface StoreActions {
   addBodyweight: (date: string, weight: number) => void
   updateBodyweight: (id: string, patch: Partial<Pick<BodyweightLog, 'date' | 'weight'>>) => void
   deleteBodyweight: (id: string) => void
+  // nutrición
+  addFood: (food: Omit<Food, 'id' | 'createdAt'>) => Food
+  updateFood: (id: string, patch: Partial<Omit<Food, 'id' | 'createdAt'>>) => void
+  deleteFood: (id: string) => void
+  addMeal: (name: string, components: MealComponent[]) => Meal
+  updateMeal: (id: string, patch: Partial<Pick<Meal, 'name' | 'components'>>) => void
+  deleteMeal: (id: string) => void
+  addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => DiaryEntry
+  updateDiaryEntry: (id: string, patch: Partial<Pick<DiaryEntry, 'slot' | 'grams' | 'macros' | 'label'>>) => void
+  deleteDiaryEntry: (id: string) => void
+  setNutritionGoal: (goal: NutritionGoal) => void
   // cuenta
   resetAll: () => void
 }
@@ -74,7 +107,7 @@ interface StoreValue extends StoreActions {
 const StoreContext = createContext<StoreValue | null>(null)
 
 export function StoreProvider({ children, initial, cloudUserId }: { children: ReactNode; initial: AppState; cloudUserId?: string }) {
-  const [state, setState] = useState<AppState>(() => (cloudUserId ? initial : load() ?? initial))
+  const [state, setState] = useState<AppState>(() => withDefaults(cloudUserId ? initial : load() ?? initial))
   const stateRef = useRef(state)
   stateRef.current = state
 
@@ -236,6 +269,50 @@ export function StoreProvider({ children, initial, cloudUserId }: { children: Re
       deleteBodyweight(id) {
         setState((s) => ({ ...s, bodyweight: s.bodyweight.filter((b) => b.id !== id) }))
       },
+      addFood(food) {
+        const f: Food = { ...food, id: uid(), createdAt: todayISO() }
+        setState((s) => ({ ...s, foods: [...s.foods, f] }))
+        return f
+      },
+      updateFood(id, patch) {
+        setState((s) => ({ ...s, foods: s.foods.map((f) => (f.id === id ? { ...f, ...patch } : f)) }))
+      },
+      deleteFood(id) {
+        setState((s) => ({
+          ...s,
+          foods: s.foods.filter((f) => f.id !== id),
+          meals: s.meals.map((meal) =>
+            meal.components.some((c) => c.foodId === id)
+              ? { ...meal, components: meal.components.filter((c) => c.foodId !== id) }
+              : meal,
+          ),
+        }))
+      },
+      addMeal(name, components) {
+        const meal: Meal = { id: uid(), name: name.trim(), components, createdAt: todayISO() }
+        setState((s) => ({ ...s, meals: [...s.meals, meal] }))
+        return meal
+      },
+      updateMeal(id, patch) {
+        setState((s) => ({ ...s, meals: s.meals.map((meal) => (meal.id === id ? { ...meal, ...patch } : meal)) }))
+      },
+      deleteMeal(id) {
+        setState((s) => ({ ...s, meals: s.meals.filter((meal) => meal.id !== id) }))
+      },
+      addDiaryEntry(entry) {
+        const e: DiaryEntry = { ...entry, id: uid(), createdAt: new Date().toISOString() }
+        setState((s) => ({ ...s, diary: [...s.diary, e] }))
+        return e
+      },
+      updateDiaryEntry(id, patch) {
+        setState((s) => ({ ...s, diary: s.diary.map((e) => (e.id === id ? { ...e, ...patch } : e)) }))
+      },
+      deleteDiaryEntry(id) {
+        setState((s) => ({ ...s, diary: s.diary.filter((e) => e.id !== id) }))
+      },
+      setNutritionGoal(goal) {
+        setState((s) => ({ ...s, nutritionGoal: goal }))
+      },
       resetAll() {
         setState({
           exercises: [],
@@ -244,6 +321,10 @@ export function StoreProvider({ children, initial, cloudUserId }: { children: Re
           workouts: [],
           bodyweight: [],
           activeWorkoutId: null,
+          foods: [],
+          meals: [],
+          diary: [],
+          nutritionGoal: DEFAULT_NUTRITION_GOAL,
         })
       },
     }),

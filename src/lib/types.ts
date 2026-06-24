@@ -63,3 +63,63 @@ export interface BodyweightLog {
   date: string // ISO yyyy-mm-dd
   weight: number
 }
+
+// ---- Nutrición ----
+
+/** Macros. En `Food.per100` son por 100 g; en `DiaryEntry`/total de `Meal` son absolutos. */
+export interface Macros {
+  kcal: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
+/** Alimento de la biblioteca (valores por 100 g). */
+export interface Food {
+  id: string
+  name: string
+  brand?: string
+  per100: Macros
+  barcode?: string
+  createdAt: string
+}
+
+/** Ingrediente de una comida (receta). */
+export interface MealComponent {
+  foodId: string
+  grams: number
+}
+
+/** Comida = receta reutilizable, suma de alimentos. */
+export interface Meal {
+  id: string
+  name: string
+  components: MealComponent[]
+  createdAt: string
+}
+
+export type MealSlot = 'desayuno' | 'comida' | 'cena' | 'snack'
+export const MEAL_SLOTS: MealSlot[] = ['desayuno', 'comida', 'cena', 'snack']
+export type DiarySource = 'food' | 'meal' | 'quick' | 'photo'
+
+/** Entrada del diario: snapshot de lo realmente comido (macros absolutos). */
+export interface DiaryEntry {
+  id: string
+  date: string // ISO yyyy-mm-dd
+  slot: MealSlot
+  label: string
+  grams?: number
+  macros: Macros
+  source: DiarySource
+  refId?: string // foodId o mealId de origen (trazabilidad)
+  createdAt: string
+}
+
+export interface NutritionGoal {
+  kcal: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
+export const DEFAULT_NUTRITION_GOAL: NutritionGoal = { kcal: 2200, protein: 150, carbs: 220, fat: 70 }

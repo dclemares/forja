@@ -1,6 +1,23 @@
 import type { AppState } from './store'
-import type { Exercise, MuscleGroup, Workout, WorkoutExercise } from './types'
-import { uid } from './format'
+import type { DiaryEntry, Exercise, Food, MuscleGroup, Workout, WorkoutExercise } from './types'
+import { DEFAULT_NUTRITION_GOAL } from './types'
+import { todayISO, uid } from './format'
+
+const mkFood = (id: string, name: string, kcal: number, protein: number, carbs: number, fat: number, brand?: string): Food => ({
+  id,
+  name,
+  brand,
+  per100: { kcal, protein, carbs, fat },
+  createdAt: '2026-05-01',
+})
+
+const SEED_FOODS = {
+  pollo: mkFood('food-pollo', 'Pechuga de pollo', 165, 31, 0, 3.6),
+  arroz: mkFood('food-arroz', 'Arroz blanco cocido', 130, 2.7, 28, 0.3),
+  platano: mkFood('food-platano', 'Plátano', 89, 1.1, 23, 0.3),
+  avena: mkFood('food-avena', 'Copos de avena', 380, 13, 60, 7),
+  leche: mkFood('food-leche', 'Leche semidesnatada', 47, 3.4, 5, 1.6),
+}
 
 const mkEx = (id: string, name: string, muscleGroup: MuscleGroup): Exercise => ({
   id,
@@ -91,8 +108,36 @@ export function buildSeed(): AppState {
       { id: uid(), date: '2026-06-18', weight: 78.4 },
     ],
     activeWorkoutId: null,
+    foods: Object.values(SEED_FOODS),
+    meals: [
+      {
+        id: 'meal-batido',
+        name: 'Batido de avena',
+        components: [
+          { foodId: SEED_FOODS.avena.id, grams: 50 },
+          { foodId: SEED_FOODS.leche.id, grams: 250 },
+          { foodId: SEED_FOODS.platano.id, grams: 100 },
+        ],
+        createdAt: '2026-05-01',
+      },
+    ],
+    diary: [
+      diaryEntry('comida', 'Pechuga de pollo', 200, { kcal: 330, protein: 62, carbs: 0, fat: 7.2 }, 'food', SEED_FOODS.pollo.id),
+      diaryEntry('comida', 'Arroz blanco cocido', 150, { kcal: 195, protein: 4, carbs: 42, fat: 0.5 }, 'food', SEED_FOODS.arroz.id),
+      diaryEntry('snack', 'Plátano', 120, { kcal: 107, protein: 1.3, carbs: 27.6, fat: 0.4 }, 'food', SEED_FOODS.platano.id),
+    ],
+    nutritionGoal: { kcal: 2400, protein: 165, carbs: 250, fat: 75 },
   }
 }
+
+const diaryEntry = (
+  slot: DiaryEntry['slot'],
+  label: string,
+  grams: number,
+  macros: DiaryEntry['macros'],
+  source: DiaryEntry['source'],
+  refId?: string,
+): DiaryEntry => ({ id: uid(), date: todayISO(), slot, label, grams, macros, source, refId, createdAt: todayISO() })
 
 /** Estado de arranque para un usuario NUEVO: cuenta completamente vacía. */
 export function buildEmpty(): AppState {
@@ -103,5 +148,9 @@ export function buildEmpty(): AppState {
     workouts: [],
     bodyweight: [],
     activeWorkoutId: null,
+    foods: [],
+    meals: [],
+    diary: [],
+    nutritionGoal: DEFAULT_NUTRITION_GOAL,
   }
 }

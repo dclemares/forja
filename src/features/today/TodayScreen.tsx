@@ -12,6 +12,8 @@ import { isSoundEnabled, setSoundEnabled, playClick } from '@/lib/sound'
 import { formatLongDate, formatNumber, todayISO } from '@/lib/format'
 import { workoutVolume, workoutSetCount } from '@/lib/domain/volume'
 import { isoWeekKey, bodyweightTrend, weeklyStreak } from '@/lib/domain/trends'
+import { dailyTotals } from '@/lib/domain/nutrition'
+import { MacroRing, MacroBar } from '@/components/charts/MacroRing'
 
 export function TodayScreen() {
   const { state, startWorkout, startFreeWorkout, addBodyweight, deleteWorkout, resetAll } = useStore()
@@ -39,6 +41,8 @@ export function TodayScreen() {
   const deltaPct = prevWeek > 0 ? Math.round(((thisWeek - prevWeek) / prevWeek) * 100) : null
   const body = bodyweightTrend(state.bodyweight)
   const lastBody = body[body.length - 1]
+  const nutToday = dailyTotals(state.diary, todayISO())
+  const nutGoal = state.nutritionGoal
   const streak = weeklyStreak(state.workouts, todayISO())
   const activeEmpty = active ? workoutSetCount(active) === 0 : false
 
@@ -165,6 +169,21 @@ export function TodayScreen() {
           )}
         </GlassCard>
       </div>
+
+      <GlassCard style={{ padding: 15, marginBottom: 12 }} onClick={() => navigate('/nutrition')}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Nutrición · hoy</div>
+          <button aria-label="Añadir comida" className="gold-shine" onClick={(e) => { e.stopPropagation(); navigate('/nutrition') }} style={miniAdd}><Plus size={16} /></button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 'none' }}><MacroRing value={nutToday.kcal} goal={nutGoal.kcal} size={108} /></div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
+            <MacroBar label="Proteína" kind="protein" value={nutToday.protein} goal={nutGoal.protein} />
+            <MacroBar label="Carbos" kind="carbs" value={nutToday.carbs} goal={nutGoal.carbs} />
+            <MacroBar label="Grasa" kind="fat" value={nutToday.fat} goal={nutGoal.fat} />
+          </div>
+        </div>
+      </GlassCard>
 
       {last && (
         <GlassCard style={{ padding: 15, marginBottom: 12 }} onClick={() => navigate(`/history/${last.id}`)}>
