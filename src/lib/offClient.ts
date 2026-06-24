@@ -27,11 +27,15 @@ function mapProduct(p: OffProduct): OffFood | null {
   const name = (p.product_name ?? '').trim()
   if (!name) return null
   const nut = p.nutriments ?? {}
-  let kcal = nut['energy-kcal_100g']
-  if (typeof kcal !== 'number') {
-    const kj = nut['energy_100g']
-    if (typeof kj === 'number') kcal = kj / 4.184
-  }
+  // kcal: el campo `energy-kcal_100g` de OFF a veces trae datos erróneos
+  // (p. ej. 1000, imposible: el máximo físico son ~900 kcal/100 g = grasa pura).
+  // Si es implausible o falta, lo derivamos del valor en kJ, que es fiable.
+  const kcalField = nut['energy-kcal_100g']
+  const kj = num(nut['energy-kj_100g']) || (String(nut['energy_unit']) === 'kJ' ? num(nut['energy_100g']) : 0)
+  let kcal: number
+  if (typeof kcalField === 'number' && kcalField > 0 && kcalField <= 900) kcal = kcalField
+  else if (kj > 0) kcal = kj / 4.184
+  else kcal = num(kcalField)
   const sq = typeof p.serving_quantity === 'string' ? parseFloat(p.serving_quantity) : p.serving_quantity
   const serving = typeof sq === 'number' && Number.isFinite(sq) && sq > 0 ? Math.round(sq) : undefined
   const servingLabel = (p.serving_size ?? '').trim() || undefined
