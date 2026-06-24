@@ -25,7 +25,12 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } })
 
 const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
-const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash'
+// Cadena de modelos: si el primero está saturado (503), prueba el siguiente.
+// Cada modelo tiene capacidad/cuota separada, así que el fallback sube mucho el éxito.
+const MODELS = (Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
 
 const SYSTEM = [
   'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
@@ -60,50 +65,43 @@ Deno.serve(async (req: Request) => {
   const note = (body.note ?? '').trim()
   const dataUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
 
-  const reqBody = JSON.stringify({
-    model: MODEL,
-    temperature: 0.2,
-    max_tokens: 500,
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: SYSTEM },
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
-          { type: 'image_url', image_url: { url: dataUrl } },
-        ],
-      },
-    ],
-  })
+  const messages = [
+    { role: 'system', content: SYSTEM },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
+        { type: 'image_url', image_url: { url: dataUrl } },
+      ],
+    },
+  ]
 
   try {
-    // El tier gratis devuelve 429/503 ("modelo saturado") de forma intermitente: reintenta.
     let d: { choices?: { message?: { content?: string } }[] } | null = null
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const r = await fetch(`${BASE_URL}/chat/completions`, {
-        method: 'POST',
-        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-        body: reqBody,
-      })
-      if (r.ok) {
-        d = await r.json().catch(() => ({}))
-        break
+    let lastInfo = ''
+    // Recorre la cadena de modelos; en sobrecarga (5xx) reintenta una vez y, si sigue,
+    // pasa al siguiente modelo (capacidad/cuota separada → mucho más éxito).
+    chain: for (const model of MODELS) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const r = await fetch(`${BASE_URL}/chat/completions`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ model, temperature: 0.2, max_tokens: 500, response_format: { type: 'json_object' }, messages }),
+        })
+        if (r.ok) {
+          d = await r.json().catch(() => ({}))
+          break chain
+        }
+        const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 220)
+        lastInfo += `[${model} ${r.status}: ${raw}] `
+        if ((r.status === 500 || r.status === 502 || r.status === 503) && attempt < 1) {
+          await new Promise((res) => setTimeout(res, 600))
+          continue
+        }
+        break // siguiente modelo de la cadena
       }
-      const err = await r.json().catch(() => ({}))
-      const upstream = err?.error?.message ? String(err.error.message) : ''
-      // 500/502/503 = sobrecarga transitoria del modelo: reintenta con espera.
-      if ((r.status === 500 || r.status === 502 || r.status === 503) && attempt < 2) {
-        await new Promise((res) => setTimeout(res, 700 * (attempt + 1)))
-        continue
-      }
-      // 429 = límite de cuota/ritmo: no reintentar (quemaría más). Se devuelve el detalle real.
-      if (r.status === 429) {
-        return json({ error: upstream || 'Demasiadas peticiones. Espera unos segundos y vuelve a intentarlo.', status: 429, model: MODEL }, 429)
-      }
-      return json({ error: upstream || `Error del modelo (${r.status})`, status: r.status, model: MODEL }, 502)
     }
-    if (!d) return json({ error: 'El modelo está saturado. Inténtalo de nuevo en unos segundos.' }, 503)
+    if (!d) return json({ error: 'Los modelos gratis están saturados ahora mismo. Inténtalo de nuevo en unos segundos.', detail: lastInfo }, 503)
 
     const text: string = d?.choices?.[0]?.message?.content ?? ''
     let parsed: Record<string, unknown> | null = null
