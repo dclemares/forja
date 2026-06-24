@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Camera, Plus, Sparkles } from 'lucide-react'
 import { PillButton } from '@/components/ui/PillButton'
-import { estimateMeal, fileToScaledBase64, type MealEstimate } from '@/lib/aiEstimate'
+import { estimateMeal, fileToScaledBase64, type MealEstimate, type MealItem } from '@/lib/aiEstimate'
 import type { Macros } from '@/lib/types'
 
 const num = (s: string): number => {
@@ -18,6 +18,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   const [payload, setPayload] = useState<{ data: string; mediaType: string } | null>(null)
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
+  const [items, setItems] = useState<MealItem[]>([])
   const [est, setEst] = useState<{ reasoning: string; label: string; grams: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ reasoning: '', label: '', grams: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
 
   const onFile = async (file: File) => {
@@ -31,6 +32,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     setPhase('loading')
     try {
       const r: MealEstimate = await estimateMeal({ imageBase64: payload.data, mediaType: payload.mediaType, note })
+      setItems(r.items ?? [])
       setEst({ reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
       setPhase('result')
     } catch (e) {
@@ -76,8 +78,21 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
               {est.reasoning}
             </div>
           )}
+          {items.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={reasoningTitle}>Ingredientes</div>
+              {items.map((it, i) => (
+                <div key={i} style={itemRow}>
+                  <span style={{ flex: 1, fontWeight: 600, fontSize: 14, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--ink-soft)', flex: 'none' }}>{Math.round(it.grams)} g</span>
+                  <span style={{ fontSize: 11, color: 'var(--ink-faint)', flex: 'none' }}>P{Math.round(it.protein)} C{Math.round(it.carbs)} G{Math.round(it.fat)}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14, flex: 'none', minWidth: 58, textAlign: 'right' }}>{Math.round(it.kcal)} kcal</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div style={{ marginBottom: 10 }}>
-            <Field label="Cantidad estimada (g)" value={est.grams} onChange={(v) => setEst((s) => ({ ...s, grams: v }))} />
+            <Field label="Cantidad total estimada (g)" value={est.grams} onChange={(v) => setEst((s) => ({ ...s, grams: v }))} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <Field label="Calorías (kcal)" value={est.kcal} onChange={(v) => setEst((s) => ({ ...s, kcal: v }))} />
@@ -103,5 +118,6 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 
 const reasoningBox: React.CSSProperties = { background: 'var(--accent-tint)', border: '1.5px solid rgba(120,80,30,.2)', borderRadius: 12, padding: '10px 13px', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.45, marginBottom: 12 }
 const reasoningTitle: React.CSSProperties = { fontSize: 11, fontWeight: 800, color: 'var(--accent)', marginBottom: 4, letterSpacing: '.02em' }
+const itemRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 8, padding: '7px 2px', borderBottom: '1px solid var(--hairline)' }
 const inp: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const dropZone: React.CSSProperties = { width: '100%', height: 180, borderRadius: 14, border: '2px dashed #9A6A3A', background: 'rgba(120,80,30,.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', fontSize: 14, overflow: 'hidden', padding: 0 }

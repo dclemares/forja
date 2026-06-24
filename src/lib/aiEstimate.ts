@@ -7,9 +7,19 @@ const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
  *  Activar con VITE_AI_PHOTO=1 una vez desplegada la Edge Function `estimate-meal`. */
 export const aiPhotoEnabled = (): boolean => import.meta.env.VITE_AI_PHOTO === '1' && isSupabaseConfigured
 
+export interface MealItem {
+  name: string
+  grams: number
+  kcal: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
 export interface MealEstimate {
   reasoning: string
   label: string
+  items: MealItem[]
   grams: number
   kcal: number
   protein: number
