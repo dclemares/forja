@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) =>
 const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
 // Cadena de modelos: si el primero está saturado (503), prueba el siguiente.
 // Cada modelo tiene capacidad/cuota separada, así que el fallback sube mucho el éxito.
-const MODELS = (Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash')
+const MODELS = (Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-2.0-flash-lite')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
@@ -80,39 +80,38 @@ Deno.serve(async (req: Request) => {
   try {
     let d: { choices?: { message?: { content?: string } }[] } | null = null
     let lastInfo = ''
-    // Recorre la cadena de modelos; en sobrecarga (5xx) reintenta una vez y, si sigue,
-    // pasa al siguiente modelo (capacidad/cuota separada → mucho más éxito).
-    chain: for (const model of MODELS) {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        const r = await fetch(`${BASE_URL}/chat/completions`, {
-          method: 'POST',
-          headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-          body: JSON.stringify({ model, temperature: 0.2, max_tokens: 500, response_format: { type: 'json_object' }, messages }),
-        })
-        if (r.ok) {
-          d = await r.json().catch(() => ({}))
-          break chain
-        }
-        const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 220)
-        lastInfo += `[${model} ${r.status}: ${raw}] `
-        if ((r.status === 500 || r.status === 502 || r.status === 503) && attempt < 1) {
-          await new Promise((res) => setTimeout(res, 600))
-          continue
-        }
-        break // siguiente modelo de la cadena
+    // Una llamada por modelo (sin reintento interno, para no quemar cuota). Si un
+    // modelo falla, pasa al siguiente: cada uno tiene capacidad/cuota separada.
+    for (const model of MODELS) {
+      const r = await fetch(`${BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1200, response_format: { type: 'json_object' }, messages }),
+      })
+      if (r.ok) {
+        d = await r.json().catch(() => ({}))
+        break
       }
+      const raw = (await r.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160)
+      lastInfo += `[${model} ${r.status}: ${raw}] `
     }
     if (!d) return json({ error: 'Los modelos gratis están saturados ahora mismo. Inténtalo de nuevo en unos segundos.', detail: lastInfo }, 503)
 
-    const text: string = d?.choices?.[0]?.message?.content ?? ''
+    let text = (d?.choices?.[0]?.message?.content ?? '').trim()
+    // Quita fences de markdown si el modelo los añade (```json ... ```).
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
     let parsed: Record<string, unknown> | null = null
     try {
       parsed = JSON.parse(text)
     } catch {
       const m = text.match(/\{[\s\S]*\}/)
-      parsed = m ? JSON.parse(m[0]) : null
+      try {
+        parsed = m ? JSON.parse(m[0]) : null
+      } catch {
+        parsed = null
+      }
     }
-    if (!parsed) return json({ error: 'Respuesta no interpretable.' }, 502)
+    if (!parsed) return json({ error: 'La IA no devolvió un resultado legible. Inténtalo de nuevo.', raw: text.slice(0, 300) }, 502)
 
     return json(
       {
