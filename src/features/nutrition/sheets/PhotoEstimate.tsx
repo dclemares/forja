@@ -21,7 +21,26 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [items, setItems] = useState<MealItem[]>([])
+  const [gramsEd, setGramsEd] = useState<string[]>([]) // gramos editables por ingrediente
   const [est, setEst] = useState<{ provider: string; description: string; reasoning: string; label: string; grams: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ provider: '', description: '', reasoning: '', label: '', grams: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
+
+  // Macros de un ingrediente escaladas a los gramos editados (regla de tres sobre lo estimado).
+  const itemFactor = (i: number): number => {
+    const base = items[i]?.grams || 0
+    return base > 0 ? num(gramsEd[i] ?? '') / base : 0
+  }
+  const itemMacro = (i: number, key: 'kcal' | 'protein' | 'carbs' | 'fat'): number => (items[i]?.[key] ?? 0) * itemFactor(i)
+  const totals = items.reduce(
+    (acc, _it, i) => ({
+      grams: acc.grams + num(gramsEd[i] ?? ''),
+      kcal: acc.kcal + itemMacro(i, 'kcal'),
+      protein: acc.protein + itemMacro(i, 'protein'),
+      carbs: acc.carbs + itemMacro(i, 'carbs'),
+      fat: acc.fat + itemMacro(i, 'fat'),
+    }),
+    { grams: 0, kcal: 0, protein: 0, carbs: 0, fat: 0 },
+  )
+  const setGramAt = (i: number, v: string) => setGramsEd((arr) => arr.map((g, j) => (j === i ? v : g)))
 
   const onFile = async (file: File) => {
     const scaled = await fileToScaledBase64(file)
@@ -35,6 +54,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     try {
       const r: MealEstimate = await estimateMeal({ imageBase64: payload.data, mediaType: payload.mediaType, note })
       setItems(r.items ?? [])
+      setGramsEd((r.items ?? []).map((it) => String(Math.round(it.grams))))
       setEst({ provider: r.provider, description: r.description, reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
       setPhase('result')
     } catch (e) {
@@ -86,29 +106,45 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
               {est.reasoning}
             </div>
           )}
-          {items.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={reasoningTitle}>Ingredientes</div>
+          {items.length > 0 ? (
+            <div style={{ marginBottom: 14 }}>
+              <div style={reasoningTitle}>Ingredientes · edita los gramos de cada uno</div>
               {items.map((it, i) => (
                 <div key={i} style={itemRow}>
-                  <span style={{ flex: 1, fontWeight: 600, fontSize: 14, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
-                  <span style={{ fontSize: 12, color: 'var(--ink-soft)', flex: 'none' }}>{Math.round(it.grams)} g</span>
-                  <span style={{ fontSize: 11, color: 'var(--ink-faint)', flex: 'none' }}>P{Math.round(it.protein)} C{Math.round(it.carbs)} G{Math.round(it.fat)}</span>
-                  <span style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14, flex: 'none', minWidth: 58, textAlign: 'right' }}>{Math.round(it.kcal)} kcal</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ flex: 1, fontWeight: 600, fontSize: 14, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
+                    <input autoComplete="off" data-1p-ignore data-lpignore="true" inputMode="decimal" value={gramsEd[i] ?? ''} onChange={(e) => setGramAt(i, e.target.value)} style={gramsInput} />
+                    <span style={{ fontSize: 12, color: 'var(--ink-soft)', flex: 'none' }}>g</span>
+                    <span style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14, flex: 'none', minWidth: 56, textAlign: 'right' }}>{Math.round(itemMacro(i, 'kcal'))} kcal</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}>P{Math.round(itemMacro(i, 'protein'))} · C{Math.round(itemMacro(i, 'carbs'))} · G{Math.round(itemMacro(i, 'fat'))}</div>
                 </div>
               ))}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '10px 2px 0' }}>
+                <span style={{ flex: 1, fontWeight: 800 }}>Total</span>
+                <span style={{ fontWeight: 700, color: 'var(--ink-soft)' }}>{Math.round(totals.grams)} g</span>
+                <span style={{ fontWeight: 800, color: 'var(--accent)', fontSize: 16, minWidth: 64, textAlign: 'right' }}>{Math.round(totals.kcal)} kcal</span>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--ink-soft)', textAlign: 'right', marginTop: 2 }}>P{Math.round(totals.protein)} · C{Math.round(totals.carbs)} · G{Math.round(totals.fat)}</div>
             </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: 10 }}>
+                <Field label="Cantidad total estimada (g)" value={est.grams} onChange={(v) => setEst((s) => ({ ...s, grams: v }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <Field label="Calorías (kcal)" value={est.kcal} onChange={(v) => setEst((s) => ({ ...s, kcal: v }))} />
+                <Field label="Proteína (g)" value={est.protein} onChange={(v) => setEst((s) => ({ ...s, protein: v }))} />
+                <Field label="Carbohidratos (g)" value={est.carbs} onChange={(v) => setEst((s) => ({ ...s, carbs: v }))} />
+                <Field label="Grasa (g)" value={est.fat} onChange={(v) => setEst((s) => ({ ...s, fat: v }))} />
+              </div>
+            </>
           )}
-          <div style={{ marginBottom: 10 }}>
-            <Field label="Cantidad total estimada (g)" value={est.grams} onChange={(v) => setEst((s) => ({ ...s, grams: v }))} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <Field label="Calorías (kcal)" value={est.kcal} onChange={(v) => setEst((s) => ({ ...s, kcal: v }))} />
-            <Field label="Proteína (g)" value={est.protein} onChange={(v) => setEst((s) => ({ ...s, protein: v }))} />
-            <Field label="Carbohidratos (g)" value={est.carbs} onChange={(v) => setEst((s) => ({ ...s, carbs: v }))} />
-            <Field label="Grasa (g)" value={est.fat} onChange={(v) => setEst((s) => ({ ...s, fat: v }))} />
-          </div>
-          <PillButton full size="lg" icon={<Plus size={18} />} style={{ marginTop: 16 }} onClick={() => onSave(est.label.trim() || 'Comida (foto)', { kcal: num(est.kcal), protein: num(est.protein), carbs: num(est.carbs), fat: num(est.fat) }, num(est.grams))}>Añadir al diario</PillButton>
+          <PillButton full size="lg" icon={<Plus size={18} />} style={{ marginTop: 16 }} onClick={() => {
+            const label = est.label.trim() || 'Comida (foto)'
+            if (items.length > 0) onSave(label, { kcal: Math.round(totals.kcal), protein: Math.round(totals.protein), carbs: Math.round(totals.carbs), fat: Math.round(totals.fat) }, Math.round(totals.grams))
+            else onSave(label, { kcal: num(est.kcal), protein: num(est.protein), carbs: num(est.carbs), fat: num(est.fat) }, num(est.grams))
+          }}>Añadir al diario</PillButton>
         </>
       )}
     </div>
@@ -126,6 +162,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 
 const reasoningBox: React.CSSProperties = { background: 'var(--accent-tint)', border: '1.5px solid rgba(120,80,30,.2)', borderRadius: 12, padding: '10px 13px', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.45, marginBottom: 12 }
 const reasoningTitle: React.CSSProperties = { fontSize: 11, fontWeight: 800, color: 'var(--accent)', marginBottom: 4, letterSpacing: '.02em' }
-const itemRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 8, padding: '7px 2px', borderBottom: '1px solid var(--hairline)' }
+const itemRow: React.CSSProperties = { padding: '8px 2px', borderBottom: '1px solid var(--hairline)' }
+const gramsInput: React.CSSProperties = { width: 66, flex: 'none', textAlign: 'center', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 9, padding: '6px 4px', color: 'var(--ink)', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 1px 3px rgba(80,50,20,.2)' }
 const inp: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const dropZone: React.CSSProperties = { width: '100%', height: 180, borderRadius: 14, border: '2px dashed #9A6A3A', background: 'rgba(120,80,30,.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', fontSize: 14, overflow: 'hidden', padding: 0 }
