@@ -1,10 +1,19 @@
 // Edge Function (Deno): estima calorías y macros de una comida a partir de una
-// foto + descripción, usando Claude (visión) con salida estructurada.
+// foto + descripción, usando un modelo de visión vía endpoint compatible-OpenAI.
 //
-// Secreto requerido:  supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-// Despliegue:         supabase functions deploy estimate-meal
+// Por defecto usa Gemini (tier GRATIS de Google AI Studio). Como el endpoint es
+// compatible-OpenAI, cambiar de proveedor (Groq, Qwen, GLM…) es solo config:
+// basta con cambiar los secretos AI_BASE_URL / AI_MODEL / AI_API_KEY.
 //
-// La clave de Anthropic vive SOLO aquí (servidor); nunca llega al cliente.
+// Secretos (Supabase):
+//   supabase secrets set AI_API_KEY=<tu_clave_gratis>
+//   # opcionales (con estos valores por defecto apunta a Gemini):
+//   supabase secrets set AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+//   supabase secrets set AI_MODEL=gemini-2.5-flash
+// Despliegue:
+//   supabase functions deploy estimate-meal
+//
+// La clave vive SOLO aquí (servidor); nunca llega al cliente.
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -15,34 +24,30 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } })
 
-// Modelo por defecto. Para abaratar, cambia a 'claude-haiku-4-5'.
-const MODEL = 'claude-opus-4-8'
+const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
+const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash'
 
-const SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    label: { type: 'string' },
-    kcal: { type: 'number' },
-    protein: { type: 'number' },
-    carbs: { type: 'number' },
-    fat: { type: 'number' },
-    confidence: { type: 'string', enum: ['baja', 'media', 'alta'] },
-  },
-  required: ['label', 'kcal', 'protein', 'carbs', 'fat', 'confidence'],
+const SYSTEM = [
+  'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
+  'Combina ambas: la FOTO te da la cantidad/porción que se ve, y la DESCRIPCIÓN del usuario te dice qué es y cómo está cocinado.',
+  'Estima de forma APROXIMADA las calorías totales y los macros (en gramos) de la ración COMPLETA que se ve (no por 100 g).',
+  'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
+  '{"label": string (nombre corto del plato en español), "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
+  'Sin texto adicional, sin markdown, solo el JSON.',
+].join('\n')
+
+const num = (v: unknown): number => {
+  const n = typeof v === 'number' ? v : parseFloat(String(v ?? '').replace(',', '.'))
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : 0
 }
-
-const prompt = (note: string) =>
-  `Eres un nutricionista. A partir de la foto del plato y la nota del usuario, estima de forma APROXIMADA las calorías totales y los macros (en gramos) de la ración que se ve en la imagen (no por 100 g).\n` +
-  `Nota del usuario: "${note || '(sin nota)'}".\n` +
-  `"label" = nombre corto del plato en español. "confidence" = tu confianza en la estimación. Devuelve solo el JSON del esquema.`
+const confidenceOf = (v: unknown): string => (['baja', 'media', 'alta'].includes(String(v)) ? String(v) : 'media')
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405)
 
-  const key = Deno.env.get('ANTHROPIC_API_KEY')
-  if (!key) return json({ error: 'Falta ANTHROPIC_API_KEY en el servidor.' }, 500)
+  const key = Deno.env.get('AI_API_KEY') ?? Deno.env.get('GEMINI_API_KEY')
+  if (!key) return json({ error: 'Falta AI_API_KEY en el servidor.' }, 500)
 
   let body: { imageBase64?: string; mediaType?: string; note?: string }
   try {
@@ -52,30 +57,36 @@ Deno.serve(async (req: Request) => {
   }
   if (!body.imageBase64) return json({ error: 'Falta la imagen.' }, 400)
 
+  const note = (body.note ?? '').trim()
+  const dataUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
+
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch(`${BASE_URL}/chat/completions`, {
       method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1024,
-        output_config: { format: { type: 'json_schema', schema: SCHEMA } },
+        temperature: 0.2,
+        max_tokens: 500,
+        response_format: { type: 'json_object' },
         messages: [
+          { role: 'system', content: SYSTEM },
           {
             role: 'user',
             content: [
-              { type: 'image', source: { type: 'base64', media_type: body.mediaType || 'image/jpeg', data: body.imageBase64 } },
-              { type: 'text', text: prompt(body.note || '') },
+              { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
+              { type: 'image_url', image_url: { url: dataUrl } },
             ],
           },
         ],
       }),
     })
-    const d = await r.json()
-    if (!r.ok) return json({ error: d?.error?.message || 'Error del modelo' }, 502)
 
-    const text: string = (d.content || []).filter((b: { type: string }) => b.type === 'text').map((b: { text: string }) => b.text).join('')
-    let parsed: unknown
+    const d = await r.json().catch(() => ({}))
+    if (!r.ok) return json({ error: d?.error?.message || `Error del modelo (${r.status})` }, 502)
+
+    const text: string = d?.choices?.[0]?.message?.content ?? ''
+    let parsed: Record<string, unknown> | null = null
     try {
       parsed = JSON.parse(text)
     } catch {
@@ -83,7 +94,18 @@ Deno.serve(async (req: Request) => {
       parsed = m ? JSON.parse(m[0]) : null
     }
     if (!parsed) return json({ error: 'Respuesta no interpretable.' }, 502)
-    return json(parsed, 200)
+
+    return json(
+      {
+        label: String(parsed.label ?? 'Comida').slice(0, 80),
+        kcal: num(parsed.kcal),
+        protein: num(parsed.protein),
+        carbs: num(parsed.carbs),
+        fat: num(parsed.fat),
+        confidence: confidenceOf(parsed.confidence),
+      },
+      200,
+    )
   } catch (e) {
     return json({ error: String(e) }, 500)
   }
