@@ -32,19 +32,19 @@ interface Provider {
   models: string[]
 }
 
-// Orden de proveedores: Groq primero (pool fresco, rápido), Gemini de respaldo.
+// Orden de proveedores: Gemini primero (Google); si falla, Groq de respaldo.
 const PROVIDERS: Provider[] = [
-  {
-    name: 'groq',
-    baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
-    key: Deno.env.get('GROQ_API_KEY'),
-    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct,meta-llama/llama-4-maverick-17b-128e-instruct'),
-  },
   {
     name: 'gemini',
     baseUrl: (Deno.env.get('GEMINI_BASE_URL') ?? Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, ''),
     key: Deno.env.get('GEMINI_API_KEY') ?? Deno.env.get('AI_API_KEY'),
     models: splitList(Deno.env.get('GEMINI_MODELS') ?? Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash'),
+  },
+  {
+    name: 'groq',
+    baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
+    key: Deno.env.get('GROQ_API_KEY'),
+    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct,meta-llama/llama-4-maverick-17b-128e-instruct'),
   },
 ]
 

@@ -32,8 +32,8 @@ Basta con tener **al menos una** clave. Recomendado: las dos, para máxima fiabi
 
 4. Activar el botón "Foto (IA)": `VITE_AI_PHOTO=1` en `.env.production` y push a `main`.
 
-Orden por defecto: **Groq primero** (rápido, pool fresco), **Gemini de respaldo**. Se puede
-ajustar la lista de modelos con `GROQ_MODELS` / `GEMINI_MODELS` (CSV) sin tocar código.
+Orden por defecto: **Gemini primero** (Google); si falla, **Groq de respaldo**. Se puede
+ajustar la lista de modelos con `GEMINI_MODELS` / `GROQ_MODELS` (CSV) sin tocar código.
 
 ## Modelos por defecto
 
