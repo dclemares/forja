@@ -1,62 +1,40 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import type { IScannerControls } from '@zxing/browser'
 
-interface DetectedBarcode { rawValue: string }
-interface BarcodeDetectorLike { detect: (source: CanvasImageSource) => Promise<DetectedBarcode[]> }
-type BarcodeDetectorCtor = new (opts?: { formats?: string[] }) => BarcodeDetectorLike
-
-/** Escáner de código de barras nativo (BarcodeDetector). Solo se monta donde esté soportado. */
+/** Escáner de código de barras universal (zxing, cargado bajo demanda).
+ *  Funciona en Android, iOS y escritorio donde haya cámara. */
 export function BarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const Ctor = (window as unknown as { BarcodeDetector?: BarcodeDetectorCtor }).BarcodeDetector
-    if (!Ctor) {
-      setError('Tu navegador no soporta el escáner.')
-      return
-    }
-    const detector = new Ctor({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] })
-    let stream: MediaStream | null = null
-    let raf = 0
-    let stopped = false
-
-    const cleanup = () => {
-      stopped = true
-      if (raf) cancelAnimationFrame(raf)
-      if (stream) stream.getTracks().forEach((t) => t.stop())
-    }
+    let controls: IScannerControls | undefined
+    let cancelled = false
 
     ;(async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        if (stopped) { stream.getTracks().forEach((t) => t.stop()); return }
+        const { BrowserMultiFormatReader } = await import('@zxing/browser')
+        const reader = new BrowserMultiFormatReader()
         const v = videoRef.current
         if (!v) return
-        v.srcObject = stream
-        await v.play()
-        const tick = async () => {
-          if (stopped || !videoRef.current) return
-          try {
-            const codes = await detector.detect(videoRef.current)
-            if (codes.length > 0 && codes[0].rawValue) {
-              cleanup()
-              onDetect(codes[0].rawValue)
-              return
-            }
-          } catch {
-            /* frame sin código */
-          }
-          raf = requestAnimationFrame(tick)
-        }
-        raf = requestAnimationFrame(tick)
+        controls = await reader.decodeFromConstraints({ video: { facingMode: 'environment' } }, v, (result) => {
+          if (cancelled || !result) return
+          cancelled = true
+          try { controls?.stop() } catch { /* ignore */ }
+          onDetect(result.getText())
+        })
+        if (cancelled) { try { controls?.stop() } catch { /* ignore */ } }
       } catch {
         setError('No se pudo abrir la cámara. Revisa los permisos.')
       }
     })()
 
-    return cleanup
+    return () => {
+      cancelled = true
+      try { controls?.stop() } catch { /* ignore */ }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

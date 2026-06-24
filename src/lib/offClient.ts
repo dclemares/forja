@@ -55,12 +55,16 @@ export async function lookupBarcode(ean: string): Promise<OffFood | null> {
   }
 }
 
-/** Busca alimentos por texto. Devuelve los que tengan nombre y calorías. */
+/** Busca alimentos por texto. Usa el buscador de texto completo (cgi/search.pl):
+ *  el endpoint v2 /search NO filtra por `search_terms`. Devuelve los que tengan
+ *  nombre y calorías. */
 export async function searchFoods(query: string): Promise<OffFood[]> {
   const q = query.trim()
   if (q.length < 2) return []
   try {
-    const r = await fetch(`${OFF}/search?search_terms=${encodeURIComponent(q)}&fields=code,product_name,brands,nutriments&page_size=20&sort_by=unique_scans_n`)
+    const r = await fetch(
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,nutriments`,
+    )
     if (!r.ok) return []
     const d = (await r.json()) as { products?: OffProduct[] }
     return (d.products ?? [])
@@ -71,4 +75,7 @@ export async function searchFoods(query: string): Promise<OffFood[]> {
   }
 }
 
-export const barcodeScanSupported = (): boolean => typeof window !== 'undefined' && 'BarcodeDetector' in window
+/** El escáner funciona allí donde haya cámara (getUserMedia); usamos zxing
+ *  bajo demanda, así que no depende del soporte nativo de BarcodeDetector. */
+export const barcodeScanSupported = (): boolean =>
+  typeof navigator !== 'undefined' && !!navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function'
