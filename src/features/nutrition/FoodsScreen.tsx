@@ -26,7 +26,7 @@ export function FoodsScreen() {
       <AppBar back onBack={() => navigate('/nutrition')} title="Alimentos" right={<PillButton icon={<Plus size={16} />} onClick={() => setCreateOpen(true)} aria-label="Crear alimento" />} />
 
       <div style={{ position: 'relative', marginBottom: 10 }}>
-        <input autoComplete="off" placeholder="Buscar alimento…" value={q} onChange={(e) => setQ(e.target.value)} style={inp} />
+        <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="Buscar alimento…" value={q} onChange={(e) => setQ(e.target.value)} style={inp} />
       </div>
 
       {list.map((f) => (

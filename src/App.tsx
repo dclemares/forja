@@ -13,6 +13,7 @@ import { BodyweightScreen } from './features/bodyweight/BodyweightScreen'
 import { WorkoutScreen } from './features/workout/WorkoutScreen'
 import { ExerciseDetailScreen } from './features/workout/ExerciseDetailScreen'
 import { NutritionScreen } from './features/nutrition/NutritionScreen'
+import { NutritionProgressScreen } from './features/nutrition/NutritionProgressScreen'
 import { FoodsScreen } from './features/nutrition/FoodsScreen'
 import { MealsScreen } from './features/nutrition/MealsScreen'
 
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/progress" element={<ProgressScreen />} />
         <Route path="/bodyweight" element={<BodyweightScreen />} />
         <Route path="/nutrition" element={<NutritionScreen />} />
+        <Route path="/nutrition/progress" element={<NutritionProgressScreen />} />
         <Route path="/nutrition/foods" element={<FoodsScreen />} />
         <Route path="/nutrition/meals" element={<MealsScreen />} />
         <Route path="/workout/:id" element={<WorkoutScreen />} />

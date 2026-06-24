@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { Camera, ChevronRight, Globe, Plus, ScanBarcode, Search } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Camera, ChevronRight, Globe, Plus, ScanBarcode, Search, UtensilsCrossed } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { PillButton } from '@/components/ui/PillButton'
 import { Stepper } from '@/components/ui/Stepper'
 import { BarcodeScanner } from '@/components/ui/BarcodeScanner'
 import { useStore } from '@/lib/store'
-import { foodEntryMacros } from '@/lib/domain/nutrition'
+import { foodEntryMacros, mealGrams, mealMacros } from '@/lib/domain/nutrition'
 import { formatNumber } from '@/lib/format'
 import { barcodeScanSupported, lookupBarcode, searchFoods, type OffFood } from '@/lib/offClient'
 import { aiPhotoEnabled } from '@/lib/aiEstimate'
-import type { Food, MealSlot } from '@/lib/types'
+import type { Food, Meal, MealSlot } from '@/lib/types'
 import { FoodForm } from './FoodForm'
 import { PhotoEstimate } from './PhotoEstimate'
 
-type View = 'menu' | 'pickFood' | 'createFood' | 'grams' | 'search' | 'scan' | 'notFound' | 'photo'
+type View = 'menu' | 'pickFood' | 'pickMeal' | 'createFood' | 'grams' | 'search' | 'scan' | 'notFound' | 'photo'
 
 const slotLabel: Record<MealSlot, string> = { desayuno: 'Desayuno', comida: 'Comida', cena: 'Cena', snack: 'Snack' }
 
@@ -23,6 +23,7 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
   const [food, setFood] = useState<Food | null>(null)
   const [scanCode, setScanCode] = useState<string | undefined>(undefined)
   const canScan = barcodeScanSupported()
+  const foodsById = useMemo(() => new Map(state.foods.map((f) => [f.id, f])), [state.foods])
 
   useEffect(() => {
     if (open) {
@@ -48,6 +49,7 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
           {canScan && <MenuRow icon={<ScanBarcode size={19} />} title="Escanear código" subtitle="Lee el código de barras del producto" onClick={() => setView('scan')} />}
           <MenuRow icon={<Globe size={19} />} title="Buscar online" subtitle="Base de datos Open Food Facts" onClick={() => setView('search')} />
           <MenuRow icon={<Search size={19} />} title="Mis alimentos" subtitle={`${state.foods.length} guardados`} onClick={() => setView('pickFood')} />
+          <MenuRow icon={<UtensilsCrossed size={19} />} title="Mis comidas" subtitle={`${state.meals.length} recetas guardadas`} onClick={() => setView('pickMeal')} />
           <MenuRow icon={<Plus size={19} />} title="Crear alimento" subtitle="Alta manual por 100 g" onClick={() => setView('createFood')} />
         </div>
       )}
@@ -80,6 +82,13 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
 
       {view === 'pickFood' && (
         <FoodPicker foods={state.foods} onPick={pick} onCreate={() => setView('createFood')} />
+      )}
+
+      {view === 'pickMeal' && (
+        <MealPicker meals={state.meals} foodsById={foodsById} onLog={(meal) => {
+          addDiaryEntry({ date, slot, label: meal.name, grams: mealGrams(meal), macros: mealMacros(meal, foodsById), source: 'meal', refId: meal.id })
+          onClose()
+        }} />
       )}
 
       {view === 'createFood' && (
@@ -116,7 +125,7 @@ function OnlineSearch({ onPick }: { onPick: (off: OffFood) => void }) {
 
   return (
     <div style={{ paddingBottom: 8 }}>
-      <input autoFocus autoComplete="off" placeholder="Buscar producto (p. ej. yogur griego)…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+      <input autoFocus autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="Buscar producto (p. ej. yogur griego)…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
       {loading && <div style={{ color: 'var(--ink-faint)', fontSize: 14, padding: '12px 4px' }}>Buscando…</div>}
       {!loading && results.map((f, i) => (
         <button key={(f.code ?? '') + i} style={rowBtn} onClick={() => onPick(f)}>
@@ -150,7 +159,7 @@ function FoodPicker({ foods, onPick, onCreate }: { foods: Food[]; onPick: (f: Fo
   const list = foods.filter((f) => `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())).sort((a, b) => a.name.localeCompare(b.name))
   return (
     <div style={{ paddingBottom: 8 }}>
-      <input autoComplete="off" placeholder="Buscar en tus alimentos…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="Buscar en tus alimentos…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
       {list.map((f) => (
         <button key={f.id} style={rowBtn} onClick={() => onPick(f)}>
           <span style={{ flex: 1 }}>
@@ -162,6 +171,29 @@ function FoodPicker({ foods, onPick, onCreate }: { foods: Food[]; onPick: (f: Fo
       ))}
       {list.length === 0 && <div style={{ color: 'var(--ink-faint)', fontSize: 14, padding: '12px 4px' }}>Sin resultados.</div>}
       <PillButton full variant="dashed" icon={<Plus size={16} />} style={{ marginTop: 8 }} onClick={onCreate}>Crear alimento nuevo</PillButton>
+    </div>
+  )
+}
+
+function MealPicker({ meals, foodsById, onLog }: { meals: Meal[]; foodsById: Map<string, Food>; onLog: (m: Meal) => void }) {
+  const [q, setQ] = useState('')
+  const list = meals.filter((m) => m.name.toLowerCase().includes(q.trim().toLowerCase())).sort((a, b) => a.name.localeCompare(b.name))
+  return (
+    <div style={{ paddingBottom: 8 }}>
+      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="Buscar en tus comidas…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+      {list.map((m) => {
+        const t = mealMacros(m, foodsById)
+        return (
+          <button key={m.id} style={rowBtn} onClick={() => onLog(m)}>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-soft)' }}>{m.components.length} ingredientes · {formatNumber(t.kcal)} kcal · P{Math.round(t.protein)} C{Math.round(t.carbs)} G{Math.round(t.fat)}</span>
+            </span>
+            <Plus size={18} color="var(--accent)" />
+          </button>
+        )
+      })}
+      {list.length === 0 && <div style={{ color: 'var(--ink-faint)', fontSize: 14, padding: '12px 4px' }}>{meals.length === 0 ? 'No tienes comidas guardadas. Créalas en Nutrición · Comidas.' : 'Sin resultados.'}</div>}
     </div>
   )
 }

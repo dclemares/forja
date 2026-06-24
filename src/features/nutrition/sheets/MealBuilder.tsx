@@ -32,7 +32,7 @@ export function MealBuilder({ open, onClose, initial, onSave }: { open: boolean;
     <Sheet open={open} onClose={onClose} title={initial ? 'Editar comida' : 'Nueva comida'}>
       {view === 'edit' ? (
         <div style={{ padding: '4px 2px 12px' }}>
-          <input autoComplete="off" autoFocus={!initial} placeholder="Nombre (p. ej. Batido post-entreno)" value={name} onChange={(e) => setName(e.target.value)} style={inp} />
+          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" autoFocus={!initial} placeholder="Nombre (p. ej. Batido post-entreno)" value={name} onChange={(e) => setName(e.target.value)} style={inp} />
           <div style={{ fontSize: 12, color: 'var(--ink-soft)', margin: '14px 0 6px' }}>Ingredientes</div>
           {components.map((c, i) => {
             const f = foodsById.get(c.foodId)
@@ -60,7 +60,7 @@ export function MealBuilder({ open, onClose, initial, onSave }: { open: boolean;
         </div>
       ) : (
         <div style={{ paddingBottom: 8 }}>
-          <input autoComplete="off" autoFocus placeholder="Buscar alimento…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
+          <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" autoFocus placeholder="Buscar alimento…" value={q} onChange={(e) => setQ(e.target.value)} style={{ ...inp, marginBottom: 6 }} />
           {addList.map((f) => (
             <button key={f.id} style={rowBtn} onClick={() => { setComponents((cs) => [...cs, { foodId: f.id, grams: 100 }]); setView('edit'); setQ('') }}>
               <span style={{ flex: 1 }}>

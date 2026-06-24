@@ -33,8 +33,8 @@ export function FoodForm({ initial, submitLabel = 'Guardar', onSave }: { initial
 
   return (
     <div style={{ padding: '4px 2px 12px' }}>
-      <input autoComplete="off" autoFocus placeholder="Nombre del alimento" value={name} onChange={(e) => setName(e.target.value)} style={inp} />
-      <input autoComplete="off" placeholder="Marca (opcional)" value={brand} onChange={(e) => setBrand(e.target.value)} style={{ ...inp, marginTop: 10 }} />
+      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" autoFocus placeholder="Nombre del alimento" value={name} onChange={(e) => setName(e.target.value)} style={inp} />
+      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="Marca (opcional)" value={brand} onChange={(e) => setBrand(e.target.value)} style={{ ...inp, marginTop: 10 }} />
       <div style={{ fontSize: 12, color: 'var(--ink-soft)', margin: '14px 0 8px' }}>Por 100 g</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <Field label="Calorías (kcal)" value={kcal} onChange={setKcal} />
@@ -54,7 +54,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   return (
     <label style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
       {label}
-      <input autoComplete="off" inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
+      <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inp, marginTop: 4 }} />
     </label>
   )
 }

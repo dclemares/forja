@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Dumbbell, Plus, Settings2, UtensilsCrossed, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Dumbbell, Plus, Settings2, TrendingUp, UtensilsCrossed, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PillButton } from '@/components/ui/PillButton'
@@ -34,7 +34,12 @@ export function NutritionScreen() {
 
   return (
     <div className="anim-rise">
-      <AppBar title="Nutrición" large right={<button aria-label="Objetivo" style={iconBtn} onClick={() => setGoalOpen(true)}><Settings2 size={20} /></button>} />
+      <AppBar title="Nutrición" large right={
+        <div style={{ display: 'flex', gap: 2 }}>
+          <button aria-label="Progreso nutricional" style={iconBtn} onClick={() => navigate('/nutrition/progress')}><TrendingUp size={20} /></button>
+          <button aria-label="Objetivo" style={iconBtn} onClick={() => setGoalOpen(true)}><Settings2 size={20} /></button>
+        </div>
+      } />
 
       <div style={dateRow}>
         <button aria-label="Día anterior" style={navBtn} onClick={() => setDate((d) => shiftISO(d, -1))}><ChevronLeft size={20} /></button>

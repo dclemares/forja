@@ -20,6 +20,13 @@ export const formatDayMonth = (iso: string): string => dmf.format(parse(iso))
 export const formatShortDate = (iso: string): string => wdmf.format(parse(iso))
 export const formatLongDate = (iso: string): string => longf.format(parse(iso))
 
+/** Desplaza una fecha ISO `days` días (negativo = atrás). Local, sin TZ. */
+export const shiftISO = (iso: string, days: number): string => {
+  const [y, m, d] = iso.split('-').map(Number)
+  const dt = new Date(y, (m ?? 1) - 1, (d ?? 1) + days)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+}
+
 /** Fecha de hoy en ISO local yyyy-mm-dd. */
 export const todayISO = (): string => {
   const d = new Date()
