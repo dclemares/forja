@@ -67,7 +67,7 @@ export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey
 
       <GlassCard style={{ padding: '14px 8px 8px' }}>
         <div style={{ fontSize: 12, color: 'var(--ink-soft)', margin: '0 8px 4px' }}>{def.label} · evolución ({def.unit})</div>
-        <TrendChart points={points} unit={def.unit} zeroBased={def.zeroBased} avg={s.count ? s.avg : undefined} />
+        <TrendChart points={points} unit={def.unit} zeroBased={def.zeroBased} avg={s.count ? s.avg : undefined} decimals={def.key === 'peso' ? 1 : 0} />
       </GlassCard>
     </div>
   )

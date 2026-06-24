@@ -32,14 +32,18 @@ export function TrendChart({
   unit,
   zeroBased = true,
   avg,
+  decimals = 0,
   height = 188,
 }: {
   points: TrendPoint[]
   unit: string
   zeroBased?: boolean
   avg?: number
+  decimals?: number
   height?: number
 }) {
+  /** Valor con `decimals` decimales (coma española); si no, cifra abreviada. */
+  const fmtVal = (v: number): string => (decimals > 0 ? v.toFixed(decimals).replace('.', ',') : shortNum(v))
   const W = 320
   const padL = 44
   const padR = 12
@@ -102,7 +106,7 @@ export function TrendChart({
       {avgIn && (
         <>
           <line x1={padL} y1={y(avg!)} x2={W - padR} y2={y(avg!)} stroke={ACCENT} strokeWidth={1.3} strokeDasharray="5 4" opacity={0.65} />
-          <text x={W - padR} y={y(avg!) - 4} textAnchor="end" fontSize={9.5} fontWeight={700} fill={ACCENT}>media {shortNum(avg!)}</text>
+          <text x={W - padR} y={y(avg!) - 4} textAnchor="end" fontSize={9.5} fontWeight={700} fill={ACCENT}>media {fmtVal(avg!)}</text>
         </>
       )}
 
@@ -115,7 +119,7 @@ export function TrendChart({
       {points.map((p, i) => (
         <g key={i}>
           {(showDots || i === n - 1) && <circle cx={x(i)} cy={y(p.value)} r={i === n - 1 ? 4 : 3} fill={ACCENT} />}
-          {showVals && <text x={x(i)} y={y(p.value) - 8} textAnchor="middle" fontSize={10} fontWeight={700} fill={VALUE}>{shortNum(p.value)}</text>}
+          {showVals && <text x={x(i)} y={y(p.value) - 8} textAnchor="middle" fontSize={10} fontWeight={700} fill={VALUE}>{fmtVal(p.value)}</text>}
         </g>
       ))}
 
