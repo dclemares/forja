@@ -25,7 +25,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } })
 
 const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
-const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash'
+const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.0-flash'
 
 const SYSTEM = [
   'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
@@ -60,30 +60,49 @@ Deno.serve(async (req: Request) => {
   const note = (body.note ?? '').trim()
   const dataUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
 
-  try {
-    const r = await fetch(`${BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.2,
-        max_tokens: 500,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
-              { type: 'image_url', image_url: { url: dataUrl } },
-            ],
-          },
+  const reqBody = JSON.stringify({
+    model: MODEL,
+    temperature: 0.2,
+    max_tokens: 500,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: SYSTEM },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Estima la ración de la foto.` },
+          { type: 'image_url', image_url: { url: dataUrl } },
         ],
-      }),
-    })
+      },
+    ],
+  })
 
-    const d = await r.json().catch(() => ({}))
-    if (!r.ok) return json({ error: d?.error?.message || `Error del modelo (${r.status})` }, 502)
+  try {
+    // El tier gratis devuelve 429/503 ("modelo saturado") de forma intermitente: reintenta.
+    let d: { choices?: { message?: { content?: string } }[] } | null = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const r = await fetch(`${BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+        body: reqBody,
+      })
+      if (r.ok) {
+        d = await r.json().catch(() => ({}))
+        break
+      }
+      // 429 = límite de ritmo: reintentar quemaría más cuota → aviso claro y salir.
+      if (r.status === 429) {
+        return json({ error: 'Demasiadas peticiones seguidas. Espera unos segundos y vuelve a intentarlo.' }, 429)
+      }
+      // 500/502/503 = sobrecarga transitoria del modelo: reintenta con espera.
+      if ((r.status === 500 || r.status === 502 || r.status === 503) && attempt < 2) {
+        await new Promise((res) => setTimeout(res, 700 * (attempt + 1)))
+        continue
+      }
+      const err = await r.json().catch(() => ({}))
+      return json({ error: err?.error?.message || `Error del modelo (${r.status})` }, 502)
+    }
+    if (!d) return json({ error: 'El modelo está saturado. Inténtalo de nuevo en unos segundos.' }, 503)
 
     const text: string = d?.choices?.[0]?.message?.content ?? ''
     let parsed: Record<string, unknown> | null = null
