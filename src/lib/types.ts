@@ -81,6 +81,10 @@ export interface Food {
   brand?: string
   per100: Macros
   barcode?: string
+  /** Gramos de una ración/porción (p. ej. 1 rebanada = 30 g), si se conoce. */
+  serving?: number
+  /** Texto original de la ración (p. ej. "1 rebanada (30 g)"). */
+  servingLabel?: string
   createdAt: string
 }
 

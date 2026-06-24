@@ -17,6 +17,7 @@ export function FoodForm({ initial, submitLabel = 'Guardar', onSave }: { initial
   const [protein, setProtein] = useState(initial?.per100 ? String(initial.per100.protein) : '')
   const [carbs, setCarbs] = useState(initial?.per100 ? String(initial.per100.carbs) : '')
   const [fat, setFat] = useState(initial?.per100 ? String(initial.per100.fat) : '')
+  const [serving, setServing] = useState(initial?.serving ? String(initial.serving) : '')
 
   const save = () => {
     if (!name.trim()) return
@@ -25,6 +26,8 @@ export function FoodForm({ initial, submitLabel = 'Guardar', onSave }: { initial
       brand: brand.trim() || undefined,
       barcode: initial?.barcode,
       per100: { kcal: num(kcal), protein: num(protein), carbs: num(carbs), fat: num(fat) },
+      serving: num(serving) || undefined,
+      servingLabel: initial?.servingLabel,
     })
   }
 
@@ -38,6 +41,9 @@ export function FoodForm({ initial, submitLabel = 'Guardar', onSave }: { initial
         <Field label="Proteína (g)" value={protein} onChange={setProtein} />
         <Field label="Carbohidratos (g)" value={carbs} onChange={setCarbs} />
         <Field label="Grasa (g)" value={fat} onChange={setFat} />
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <Field label="Ración (g) · opcional, p. ej. 30 = 1 rebanada" value={serving} onChange={setServing} />
       </div>
       <PillButton full size="lg" style={{ marginTop: 16 }} onClick={save}>{submitLabel}</PillButton>
     </div>

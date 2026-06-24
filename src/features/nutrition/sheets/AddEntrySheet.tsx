@@ -41,7 +41,7 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
   /** Reutiliza el alimento si ya existe por barcode; si no, lo guarda en la biblioteca. */
   const ensureFood = (off: OffFood): Food => {
     const existing = off.code ? state.foods.find((f) => f.barcode === off.code) : undefined
-    return existing ?? addFood({ name: off.name, brand: off.brand, per100: off.per100, barcode: off.code })
+    return existing ?? addFood({ name: off.name, brand: off.brand, per100: off.per100, barcode: off.code, serving: off.serving, servingLabel: off.servingLabel })
   }
 
   return (
@@ -200,13 +200,19 @@ function FoodPicker({ foods, onPick, onCreate }: { foods: Food[]; onPick: (f: Fo
 }
 
 function GramsStep({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }) {
-  const [grams, setGrams] = useState(100)
+  const [grams, setGrams] = useState(food.serving ?? 100)
   const macros = foodEntryMacros(food, grams)
   return (
     <div style={{ padding: '4px 2px 12px' }}>
       <div style={{ fontWeight: 700, fontSize: 16 }}>{food.name}</div>
       {food.brand && <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{food.brand}</div>}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
+      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 12 }}>
+        {food.serving ? <button type="button" style={chip(grams === food.serving)} onClick={() => setGrams(food.serving!)}>1 ración · {food.serving} g</button> : null}
+        {food.serving ? <button type="button" style={chip(grams === food.serving * 2)} onClick={() => setGrams(food.serving! * 2)}>2 raciones</button> : null}
+        <button type="button" style={chip(grams === 100)} onClick={() => setGrams(100)}>100 g</button>
+      </div>
+      {food.servingLabel && <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 6 }}>Ración: {food.servingLabel}</div>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0' }}>
         <span style={{ fontSize: 13, color: 'var(--ink-soft)', flex: 'none' }}>Cantidad (g)</span>
         <div style={{ flex: 1 }}><Stepper kind="weight" step={10} value={grams} ariaLabel="gramos" onChange={(v) => setGrams(v)} /></div>
       </div>
@@ -232,3 +238,4 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 
 const inp: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const rowBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '13px 6px', background: 'none', border: 'none', borderBottom: '1px solid rgba(20,22,26,.07)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, color: 'var(--ink)', textAlign: 'left' }
+const chip = (active: boolean): React.CSSProperties => ({ border: '2px solid #9A6A3A', borderRadius: 999, padding: '5px 12px', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', color: active ? '#4A2E10' : '#6E4423', background: active ? 'linear-gradient(180deg,#FFD75C,#EDA31E)' : 'linear-gradient(180deg,#F3E3BE,#E6CF9E)', boxShadow: active ? 'inset 0 1px 0 rgba(255,240,200,.7)' : 'inset 0 1px 0 rgba(255,255,255,.5)' })
