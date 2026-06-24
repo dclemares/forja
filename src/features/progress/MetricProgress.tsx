@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { LineChart, VBars } from '@/components/charts/Charts'
+import { BodyChart, VBars, VBarsTrend } from '@/components/charts/Charts'
+import { movingAverage } from '@/lib/domain/trends'
 import { METRICS, PERIODS, bucketPoints, dailyPoints, filterPeriod, granularityForSpan, metricDef, summary, type MetricKey, type PeriodKey } from '@/lib/domain/progress'
 import { formatNumber, todayISO } from '@/lib/format'
 
@@ -23,6 +24,9 @@ export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey
   const s = summary(points)
   const bars = bucketPoints(points, granularityForSpan(points), def.agg)
   const periodLabel = PERIODS.find((p) => p.key === period)!.label
+  // El peso se dibuja como línea + tendencia (media móvil) a partir de los puntos diarios.
+  const pesoMa = movingAverage(points.map((p) => p.value), Math.max(1, Math.min(7, points.length)))
+  const pesoData = points.map((p, i) => ({ date: p.date, weight: p.value, avg: pesoMa[i] }))
 
   const withUnit = (v: number | null) => (v == null ? '—' : `${formatNumber(v)} ${def.unit}`)
   const isSum = def.agg === 'sum'
@@ -67,8 +71,10 @@ export function MetricProgress({ metrics, defaultMetric }: { metrics?: MetricKey
       </GlassCard>
 
       <GlassCard style={{ padding: 16 }}>
-        <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8 }}>{def.label} · evolución ({def.unit})</div>
-        {def.key === 'peso' ? <LineChart data={bars} /> : <VBars data={bars} />}
+        <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8 }}>
+          {def.label} · evolución ({def.unit}){(def.key === 'peso' || def.key === 'volumen') && <span style={{ color: 'var(--ink-faint)' }}> · con tendencia</span>}
+        </div>
+        {def.key === 'peso' ? <BodyChart data={pesoData} /> : def.key === 'volumen' ? <VBarsTrend data={bars} /> : <VBars data={bars} />}
       </GlassCard>
     </div>
   )

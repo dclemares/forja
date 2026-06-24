@@ -1,4 +1,5 @@
 import { formatNumber } from '@/lib/format'
+import { movingAverage } from '@/lib/domain/trends'
 
 export interface Point {
   label: string
@@ -6,6 +7,7 @@ export interface Point {
 }
 
 const ACCENT = '#C8861F'
+const TREND = '#5A3A18'
 const LABEL = 'rgba(60,38,16,.6)'
 const VALUE = '#5A3A18'
 
@@ -89,6 +91,49 @@ export function VBars({ data, height = 132 }: { data: Point[]; height?: number }
         )
       })}
     </div>
+  )
+}
+
+/** Barras verticales con una línea de tendencia (media móvil) superpuesta. */
+export function VBarsTrend({ data, height = 150 }: { data: Point[]; height?: number }) {
+  if (data.length === 0) return <EmptyChart height={height} />
+  const W = 300
+  const padTop = 18
+  const padBottom = 22
+  const innerH = height - padTop - padBottom
+  const n = data.length
+  const max = Math.max(...data.map((d) => d.value), 1)
+  const slotW = W / n
+  const barW = Math.min(30, slotW * 0.58)
+  const y = (v: number) => padTop + (1 - v / max) * innerH
+  const cx = (i: number) => slotW * (i + 0.5)
+  const ma = movingAverage(data.map((d) => d.value), Math.min(4, n))
+  const trendPts = data.map((_, i) => `${cx(i).toFixed(1)},${y(ma[i]).toFixed(1)}`).join(' ')
+  const showVals = n <= 8
+  const labelStep = Math.ceil(n / 6)
+
+  return (
+    <svg viewBox={`0 0 ${W} ${height}`} width="100%" height={height} role="img" aria-label="Barras con tendencia">
+      <defs>
+        <linearGradient id="barGold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFD75C" />
+          <stop offset="1" stopColor="#E89A1C" />
+        </linearGradient>
+      </defs>
+      {data.map((d, i) => {
+        const last = i === n - 1
+        const bh = Math.max(3, (d.value / max) * innerH)
+        return (
+          <g key={i}>
+            <rect className="chart-bar" x={cx(i) - barW / 2} y={y(d.value)} width={barW} height={bh} rx={5} fill="url(#barGold)" opacity={last ? 1 : 0.82} style={{ animationDelay: `${i * 50}ms`, transformOrigin: 'bottom' }} />
+            {showVals && <text x={cx(i)} y={y(d.value) - 5} textAnchor="middle" fontSize={10} fontWeight={700} fill={VALUE}>{shortNum(d.value)}</text>}
+            {(i % labelStep === 0 || last) && <text x={cx(i)} y={height - 6} textAnchor="middle" fontSize={9.5} fill={LABEL}>{d.label}</text>}
+          </g>
+        )
+      })}
+      {n > 1 && <polyline className="chart-line" points={trendPts} fill="none" stroke={TREND} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />}
+      {n > 1 && data.map((_, i) => <circle key={`t${i}`} cx={cx(i)} cy={y(ma[i])} r={2.4} fill={TREND} />)}
+    </svg>
   )
 }
 
