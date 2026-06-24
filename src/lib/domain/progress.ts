@@ -1,5 +1,5 @@
 import type { BodyweightLog, DiaryEntry, Workout } from '@/lib/types'
-import { shiftISO } from '@/lib/format'
+import { formatDayMonth, formatMonthShort, shiftISO } from '@/lib/format'
 import { workoutVolume } from './volume'
 import { dailyTotals } from './nutrition'
 
@@ -108,6 +108,58 @@ export interface Summary {
   max: number | null
   first: number | null
   last: number | null
+}
+
+// ---- Agrupado para la gráfica de barras / línea ----
+
+export type Granularity = 'day' | 'week' | 'month'
+
+const daysBetween = (a: string, b: string): number => {
+  const [ya, ma, da] = a.split('-').map(Number)
+  const [yb, mb, db] = b.split('-').map(Number)
+  return Math.round((Date.UTC(yb, mb - 1, db) - Date.UTC(ya, ma - 1, da)) / 86400000)
+}
+
+/** Granularidad según cuánto abarcan los datos: ≤16 d diario, ≤100 d semanal, si no mensual. */
+export function granularityForSpan(points: DayPoint[]): Granularity {
+  if (points.length <= 1) return 'day'
+  const span = daysBetween(points[0].date, points[points.length - 1].date)
+  if (span <= 16) return 'day'
+  if (span <= 100) return 'week'
+  return 'month'
+}
+
+/** Lunes (ISO) de la semana de una fecha. */
+const mondayOf = (iso: string): string => {
+  const [y, m, d] = iso.split('-').map(Number)
+  const dt = new Date(y, (m ?? 1) - 1, d ?? 1)
+  const dow = (dt.getDay() + 6) % 7
+  dt.setDate(dt.getDate() - dow)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+}
+
+export interface LabeledPoint {
+  label: string
+  value: number
+}
+
+/** Agrupa los puntos diarios en barras (día/semana/mes), sumando o promediando. */
+export function bucketPoints(points: DayPoint[], gran: Granularity, agg: 'sum' | 'avg'): LabeledPoint[] {
+  if (gran === 'day') return points.map((p) => ({ label: formatDayMonth(p.date), value: p.value }))
+  const map = new Map<string, { sum: number; n: number }>()
+  for (const p of points) {
+    const key = gran === 'week' ? mondayOf(p.date) : p.date.slice(0, 7)
+    const cur = map.get(key) ?? { sum: 0, n: 0 }
+    cur.sum += p.value
+    cur.n += 1
+    map.set(key, cur)
+  }
+  return [...map.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([key, { sum, n }]) => ({
+      label: gran === 'week' ? formatDayMonth(key) : formatMonthShort(key),
+      value: agg === 'sum' ? Math.round(sum) : round1(sum / n),
+    }))
 }
 
 /** Estadísticos del conjunto de puntos (ya filtrado). */

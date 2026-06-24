@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dailyPoints, filterPeriod, summary, type NutritionData } from './progress'
+import { bucketPoints, dailyPoints, filterPeriod, granularityForSpan, summary, type DayPoint, type NutritionData } from './progress'
 import type { BodyweightLog, DiaryEntry, Macros, Workout } from '@/lib/types'
 
 const macros = (kcal: number, protein = 0, carbs = 0, fat = 0): Macros => ({ kcal, protein, carbs, fat })
@@ -85,5 +85,44 @@ describe('summary', () => {
 
   it('vacío devuelve ceros y nulos', () => {
     expect(summary([])).toEqual({ count: 0, total: 0, avg: 0, min: null, max: null, first: null, last: null })
+  })
+})
+
+describe('granularityForSpan', () => {
+  const p = (date: string): DayPoint => ({ date, value: 1 })
+  it('≤16 días → diario, ≤100 → semanal, si no mensual', () => {
+    expect(granularityForSpan([p('2026-01-01'), p('2026-01-10')])).toBe('day')
+    expect(granularityForSpan([p('2026-01-01'), p('2026-02-20')])).toBe('week')
+    expect(granularityForSpan([p('2026-01-01'), p('2026-09-01')])).toBe('month')
+    expect(granularityForSpan([p('2026-01-01')])).toBe('day')
+  })
+})
+
+describe('bucketPoints', () => {
+  it('diario: un punto por día con etiqueta de fecha', () => {
+    const out = bucketPoints([{ date: '2026-01-01', value: 10 }, { date: '2026-01-02', value: 20 }], 'day', 'avg')
+    expect(out.map((b) => b.value)).toEqual([10, 20])
+    expect(out).toHaveLength(2)
+  })
+
+  it('semanal: suma agrupa por semana (lunes)', () => {
+    // 2026-01-05 (lun) … 2026-01-08 misma semana; 2026-01-12 (lun) otra
+    const pts = [
+      { date: '2026-01-05', value: 100 },
+      { date: '2026-01-08', value: 50 },
+      { date: '2026-01-12', value: 30 },
+    ]
+    const out = bucketPoints(pts, 'week', 'sum')
+    expect(out.map((b) => b.value)).toEqual([150, 30])
+  })
+
+  it('mensual: promedia agrupando por mes', () => {
+    const pts = [
+      { date: '2026-01-10', value: 200 },
+      { date: '2026-01-20', value: 100 },
+      { date: '2026-02-05', value: 90 },
+    ]
+    const out = bucketPoints(pts, 'month', 'avg')
+    expect(out.map((b) => b.value)).toEqual([150, 90])
   })
 })
