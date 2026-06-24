@@ -25,7 +25,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } })
 
 const BASE_URL = (Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
-const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.0-flash'
+const MODEL = Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash'
 
 const SYSTEM = [
   'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
@@ -90,17 +90,18 @@ Deno.serve(async (req: Request) => {
         d = await r.json().catch(() => ({}))
         break
       }
-      // 429 = límite de ritmo: reintentar quemaría más cuota → aviso claro y salir.
-      if (r.status === 429) {
-        return json({ error: 'Demasiadas peticiones seguidas. Espera unos segundos y vuelve a intentarlo.' }, 429)
-      }
+      const err = await r.json().catch(() => ({}))
+      const upstream = err?.error?.message ? String(err.error.message) : ''
       // 500/502/503 = sobrecarga transitoria del modelo: reintenta con espera.
       if ((r.status === 500 || r.status === 502 || r.status === 503) && attempt < 2) {
         await new Promise((res) => setTimeout(res, 700 * (attempt + 1)))
         continue
       }
-      const err = await r.json().catch(() => ({}))
-      return json({ error: err?.error?.message || `Error del modelo (${r.status})` }, 502)
+      // 429 = límite de cuota/ritmo: no reintentar (quemaría más). Se devuelve el detalle real.
+      if (r.status === 429) {
+        return json({ error: upstream || 'Demasiadas peticiones. Espera unos segundos y vuelve a intentarlo.', status: 429, model: MODEL }, 429)
+      }
+      return json({ error: upstream || `Error del modelo (${r.status})`, status: r.status, model: MODEL }, 502)
     }
     if (!d) return json({ error: 'El modelo está saturado. Inténtalo de nuevo en unos segundos.' }, 503)
 
