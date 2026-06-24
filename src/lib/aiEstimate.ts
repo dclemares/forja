@@ -8,7 +8,9 @@ const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 export const aiPhotoEnabled = (): boolean => import.meta.env.VITE_AI_PHOTO === '1' && isSupabaseConfigured
 
 export interface MealEstimate {
+  reasoning: string
   label: string
+  grams: number
   kcal: number
   protein: number
   carbs: number

@@ -11,14 +11,14 @@ const num = (s: string): number => {
 
 type Phase = 'input' | 'loading' | 'result' | 'error'
 
-export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macros) => void }) {
+export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macros, grams: number) => void }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<Phase>('input')
   const [preview, setPreview] = useState('')
   const [payload, setPayload] = useState<{ data: string; mediaType: string } | null>(null)
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
-  const [est, setEst] = useState<{ label: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ label: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
+  const [est, setEst] = useState<{ reasoning: string; label: string; grams: string; kcal: string; protein: string; carbs: string; fat: string; confidence: string }>({ reasoning: '', label: '', grams: '', kcal: '', protein: '', carbs: '', fat: '', confidence: '' })
 
   const onFile = async (file: File) => {
     const scaled = await fileToScaledBase64(file)
@@ -31,7 +31,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     setPhase('loading')
     try {
       const r: MealEstimate = await estimateMeal({ imageBase64: payload.data, mediaType: payload.mediaType, note })
-      setEst({ label: r.label, kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
+      setEst({ reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
       setPhase('result')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo estimar')
@@ -70,13 +70,22 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
               <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>Estimación IA · confianza {est.confidence || '—'} · ajústala si hace falta</div>
             </div>
           </div>
+          {est.reasoning && (
+            <div style={reasoningBox}>
+              <div style={reasoningTitle}>🔎 Lo que interpreta la IA</div>
+              {est.reasoning}
+            </div>
+          )}
+          <div style={{ marginBottom: 10 }}>
+            <Field label="Cantidad estimada (g)" value={est.grams} onChange={(v) => setEst((s) => ({ ...s, grams: v }))} />
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <Field label="Calorías (kcal)" value={est.kcal} onChange={(v) => setEst((s) => ({ ...s, kcal: v }))} />
             <Field label="Proteína (g)" value={est.protein} onChange={(v) => setEst((s) => ({ ...s, protein: v }))} />
             <Field label="Carbohidratos (g)" value={est.carbs} onChange={(v) => setEst((s) => ({ ...s, carbs: v }))} />
             <Field label="Grasa (g)" value={est.fat} onChange={(v) => setEst((s) => ({ ...s, fat: v }))} />
           </div>
-          <PillButton full size="lg" icon={<Plus size={18} />} style={{ marginTop: 16 }} onClick={() => onSave(est.label.trim() || 'Comida (foto)', { kcal: num(est.kcal), protein: num(est.protein), carbs: num(est.carbs), fat: num(est.fat) })}>Añadir al diario</PillButton>
+          <PillButton full size="lg" icon={<Plus size={18} />} style={{ marginTop: 16 }} onClick={() => onSave(est.label.trim() || 'Comida (foto)', { kcal: num(est.kcal), protein: num(est.protein), carbs: num(est.carbs), fat: num(est.fat) }, num(est.grams))}>Añadir al diario</PillButton>
         </>
       )}
     </div>
@@ -92,5 +101,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   )
 }
 
+const reasoningBox: React.CSSProperties = { background: 'var(--accent-tint)', border: '1.5px solid rgba(120,80,30,.2)', borderRadius: 12, padding: '10px 13px', fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.45, marginBottom: 12 }
+const reasoningTitle: React.CSSProperties = { fontSize: 11, fontWeight: 800, color: 'var(--accent)', marginBottom: 4, letterSpacing: '.02em' }
 const inp: React.CSSProperties = { width: '100%', background: 'linear-gradient(180deg,#F8EDCF,#ECDDB6)', border: '2px solid #9A6A3A', borderRadius: 12, padding: '11px 12px', color: 'var(--ink)', fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(80,50,20,.2)' }
 const dropZone: React.CSSProperties = { width: '100%', height: 180, borderRadius: 14, border: '2px dashed #9A6A3A', background: 'rgba(120,80,30,.06)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', fontSize: 14, overflow: 'hidden', padding: 0 }

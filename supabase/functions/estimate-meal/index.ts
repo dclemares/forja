@@ -35,9 +35,10 @@ const MODELS = (Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini
 const SYSTEM = [
   'Eres un nutricionista que estima raciones a partir de una foto y una descripción.',
   'Combina ambas: la FOTO te da la cantidad/porción que se ve, y la DESCRIPCIÓN del usuario te dice qué es y cómo está cocinado.',
-  'Estima de forma APROXIMADA las calorías totales y los macros (en gramos) de la ración COMPLETA que se ve (no por 100 g).',
+  'En "reasoning" RAZONA en español (2-4 frases): qué alimentos identificas, su cantidad aproximada en gramos por componente, y cómo llegas a las calorías. Empieza con "Veo…"/"Parece…". Ten en cuenta aceites, salsas y rebozados, que suman bastante.',
+  'Luego estima de forma APROXIMADA, para la ración COMPLETA que se ve (no por 100 g): el peso total en gramos, las calorías totales y los macros en gramos.',
   'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
-  '{"label": string (nombre corto del plato en español), "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
+  '{"reasoning": string, "label": string (nombre corto del plato en español), "grams": number (peso total estimado de la ración, en gramos), "kcal": number, "protein": number, "carbs": number, "fat": number, "confidence": "baja"|"media"|"alta"}.',
   'Sin texto adicional, sin markdown, solo el JSON.',
 ].join('\n')
 
@@ -115,7 +116,9 @@ Deno.serve(async (req: Request) => {
 
     return json(
       {
+        reasoning: String(parsed.reasoning ?? '').slice(0, 600),
         label: String(parsed.label ?? 'Comida').slice(0, 80),
+        grams: num(parsed.grams),
         kcal: num(parsed.kcal),
         protein: num(parsed.protein),
         carbs: num(parsed.carbs),

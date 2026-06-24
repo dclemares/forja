@@ -59,7 +59,7 @@ export function AddEntrySheet({ open, onClose, slot, date }: { open: boolean; on
       )}
 
       {view === 'photo' && (
-        <PhotoEstimate onSave={(label, macros) => { addDiaryEntry({ date, slot, label, macros, source: 'photo' }); onClose() }} />
+        <PhotoEstimate onSave={(label, macros, grams) => { addDiaryEntry({ date, slot, label, grams: grams || undefined, macros, source: 'photo' }); onClose() }} />
       )}
 
       {view === 'scan' && (
