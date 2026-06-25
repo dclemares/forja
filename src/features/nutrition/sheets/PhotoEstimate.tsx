@@ -58,10 +58,10 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
   }
 
   const run = async () => {
-    if (!topShot || !sideShot) return
+    if (!topShot && !sideShot && !note.trim()) return
     setPhase('loading')
     try {
-      const r: MealEstimate = await estimateMeal({ imageBase64: topShot.data, mediaType: topShot.mediaType, imageBase64Side: sideShot.data, mediaTypeSide: sideShot.mediaType, note })
+      const r: MealEstimate = await estimateMeal({ imageBase64: topShot?.data, mediaType: topShot?.mediaType, imageBase64Side: sideShot?.data, mediaTypeSide: sideShot?.mediaType, note })
       setItems(r.items ?? [])
       setGramsEd((r.items ?? []).map((it) => String(Math.round(it.grams))))
       setEst({ provider: r.provider, description: r.description, reasoning: r.reasoning, label: r.label, grams: String(Math.round(r.grams)), kcal: String(Math.round(r.kcal)), protein: String(Math.round(r.protein)), carbs: String(Math.round(r.carbs)), fat: String(Math.round(r.fat)), confidence: r.confidence })
@@ -72,7 +72,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
     }
   }
 
-  const ready = !!(topShot && sideShot)
+  const ready = !!(topShot || sideShot || note.trim())
 
   return (
     <div style={{ padding: '4px 2px 12px' }}>
@@ -82,7 +82,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
       {(phase === 'input' || phase === 'error') && (
         <>
           <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 9, lineHeight: 1.4 }}>
-            Haz <b>dos fotos</b> del mismo plato: una <b>cenital</b> (desde arriba) y otra <b>lateral</b> (de lado). La lateral deja ver el grosor, que es lo que más cuenta para el peso.
+            Sube las fotos que quieras (<b>cenital</b> y/o <b>lateral</b>) y/o escribe qué es. La lateral ayuda a calcular el grosor. <b>Mínimo: una foto o una descripción.</b>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <Slot label="Cenital · desde arriba" preview={topPreview} onClick={() => fileTop.current?.click()} />
@@ -90,7 +90,7 @@ export function PhotoEstimate({ onSave }: { onSave: (label: string, macros: Macr
           </div>
           <input autoComplete="off" autoCapitalize="off" spellCheck={false} data-1p-ignore data-lpignore="true" placeholder="¿Qué lleva? Y si hay algo de referencia (moneda, cubierto…), dilo" value={note} onChange={(e) => setNote(e.target.value)} style={{ ...inp, marginTop: 10 }} />
           {phase === 'error' && <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 10 }}>{error}</div>}
-          <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: ready ? 1 : 0.5 }} disabled={!ready} onClick={run}>{ready ? 'Estimar con IA' : 'Faltan fotos (cenital + lateral)'}</PillButton>
+          <PillButton full size="lg" icon={<Sparkles size={18} />} style={{ marginTop: 14, opacity: ready ? 1 : 0.5 }} disabled={!ready} onClick={run}>{ready ? 'Estimar con IA' : 'Añade una foto o una descripción'}</PillButton>
         </>
       )}
 

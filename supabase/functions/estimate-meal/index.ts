@@ -32,19 +32,19 @@ interface Provider {
   models: string[]
 }
 
-// Orden de proveedores: Groq primero (Llama 4 Scout); si falla, Gemini de respaldo.
+// Orden de proveedores: Gemini primero (Google); si falla, Groq de respaldo.
 const PROVIDERS: Provider[] = [
-  {
-    name: 'groq',
-    baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
-    key: Deno.env.get('GROQ_API_KEY'),
-    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct'),
-  },
   {
     name: 'gemini',
     baseUrl: (Deno.env.get('GEMINI_BASE_URL') ?? Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, ''),
     key: Deno.env.get('GEMINI_API_KEY') ?? Deno.env.get('AI_API_KEY'),
     models: splitList(Deno.env.get('GEMINI_MODELS') ?? Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash'),
+  },
+  {
+    name: 'groq',
+    baseUrl: (Deno.env.get('GROQ_BASE_URL') ?? 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
+    key: Deno.env.get('GROQ_API_KEY'),
+    models: splitList(Deno.env.get('GROQ_MODELS') ?? 'meta-llama/llama-4-scout-17b-16e-instruct'),
   },
 ]
 
@@ -52,7 +52,7 @@ const PROVIDERS: Provider[] = [
 const ATTEMPTS = PROVIDERS.filter((p) => p.key).flatMap((p) => p.models.map((model) => ({ provider: p, model })))
 
 const SYSTEM = [
-  'Eres un estimador nutricional a partir de DOS fotos del mismo plato: una CENITAL (desde arriba) y otra LATERAL (de lado), más la descripción del usuario. Sigue este método sin saltarte pasos.',
+  'Eres un estimador nutricional. Recibes, según disponga el usuario: una foto CENITAL (desde arriba), una foto LATERAL (de lado) y/o una descripción de la comida. Usa lo que haya. Si no hay ninguna foto, estima a partir de la descripción y raciones típicas, con la confianza acorde. Sigue este método sin saltarte pasos.',
   '1) IDENTIFICA cada alimento e indica si está CRUDO o COCIDO. Clave: arroz, pasta y legumbre CRUDOS tienen ~3× más kcal por gramo que cocidos; no los confundas.',
   '2) ESCALA: busca un objeto de tamaño conocido en las fotos y úsalo de referencia (moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm). Si dudas cuál es, asume el caso intermedio y dilo.',
   '3) CALCULA, no estimes a ojo: usa la foto CENITAL para el ÁREA y la LATERAL para el GROSOR. peso ≈ área(cm²) × grosor(cm) × densidad(g/cm³). Densidades aprox.: arroz/legumbre crudos ~0,85 · arroz/pasta cocidos ~0,8 · pan aireado ~0,3 · carne/pescado ~1,05 · verdura ~0,6 · salsa/aceite ~0,95.',
@@ -84,17 +84,20 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({ error: 'JSON inválido.' }, 400)
   }
-  if (!body.imageBase64) return json({ error: 'Falta la imagen.' }, 400)
-
   const note = (body.note ?? '').trim()
-  const topUrl = `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}`
-  const sideUrl = body.imageBase64Side ? `data:${body.mediaTypeSide || 'image/jpeg'};base64,${body.imageBase64Side}` : null
+  const shots: { label: string; url: string }[] = []
+  if (body.imageBase64) shots.push({ label: 'CENITAL (desde arriba)', url: `data:${body.mediaType || 'image/jpeg'};base64,${body.imageBase64}` })
+  if (body.imageBase64Side) shots.push({ label: 'LATERAL (de lado)', url: `data:${body.mediaTypeSide || 'image/jpeg'};base64,${body.imageBase64Side}` })
 
-  const userContent: Array<Record<string, unknown>> = [
-    { type: 'text', text: `Descripción del usuario: "${note || '(sin descripción)'}". Foto 1 = CENITAL (desde arriba)${sideUrl ? '. Foto 2 = LATERAL (de lado)' : ' (no se aportó foto lateral)'}. Estima la ración.` },
-    { type: 'image_url', image_url: { url: topUrl } },
-  ]
-  if (sideUrl) userContent.push({ type: 'image_url', image_url: { url: sideUrl } })
+  if (shots.length === 0 && !note) return json({ error: 'Aporta al menos una foto o una descripción.' }, 400)
+
+  const intro =
+    shots.length === 0
+      ? `Descripción del usuario: "${note}". No hay foto; estima a partir de la descripción y raciones típicas.`
+      : `Descripción del usuario: "${note || '(sin descripción)'}". ${shots.map((s, i) => `Foto ${i + 1} = ${s.label}`).join('. ')}. Estima la ración.`
+
+  const userContent: Array<Record<string, unknown>> = [{ type: 'text', text: intro }]
+  for (const s of shots) userContent.push({ type: 'image_url', image_url: { url: s.url } })
 
   const messages = [
     { role: 'system', content: SYSTEM },
@@ -114,7 +117,7 @@ Deno.serve(async (req: Request) => {
       const r = await fetch(`${provider.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: { authorization: `Bearer ${provider.key}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1500, response_format: { type: 'json_object' }, messages }),
+        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 2500, response_format: { type: 'json_object' }, messages }),
       })
       if (r.ok) {
         d = await r.json().catch(() => ({}))
