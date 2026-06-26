@@ -57,8 +57,9 @@ const SYSTEM = [
   '2) ESCALA: busca un objeto de tamaño conocido en las fotos y úsalo de referencia (moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm). Si dudas cuál es, asume el caso intermedio y dilo.',
   '3) CALCULA, no estimes a ojo: usa la foto CENITAL para el ÁREA y la LATERAL para el GROSOR. peso ≈ área(cm²) × grosor(cm) × densidad(g/cm³). Densidades aprox.: arroz/legumbre crudos ~0,85 · arroz/pasta cocidos ~0,8 · pan aireado ~0,3 · carne/pescado ~1,05 · verdura ~0,6 · salsa/aceite ~0,95.',
   '4) SANITY CHECK: contrasta con una ración normal (arroz seco 60-80 g, pasta seca 70-100 g, pan 50-90 g, pechuga 150-250 g, guarnición de verdura 100-200 g). Si te sale el doble de lo típico sin motivo claro, probablemente te has pasado: corrige.',
+  'Sé BREVE y conciso en los textos (no te enrolles).',
   'En "description" describe en 1-2 frases lo que ves (alimentos, y si están crudos o cocidos), SIN cálculos. Empieza con "Veo…".',
-  'En "reasoning" explica el cálculo en 2-5 frases: la escala usada, el área (por la cenital) y el grosor (por la lateral), la densidad y el peso resultante, y el RANGO de incertidumbre. Si una foto falta o no se aprecia el grosor, dilo y usa "confidence":"baja".',
+  'En "reasoning" explica el cálculo en máximo 3 frases: la escala usada, el grosor/volumen, la densidad y el peso, y el RANGO de incertidumbre. Si falta una foto o no se aprecia el grosor, dilo y usa "confidence":"baja".',
   'DESGLOSA en "items": un objeto por ingrediente (nombre, gramos, kcal y macros), con tu MEJOR estimación (el centro del rango) para la cantidad que se ve. Devuelve SIEMPRE al menos un ingrediente; nunca lo dejes vacío.',
   'Los totales (grams, kcal, protein, carbs, fat) deben ser la SUMA de los items. Todo para la ración COMPLETA (no por 100 g).',
   'Responde EXCLUSIVAMENTE un objeto JSON con estas claves exactas:',
@@ -117,7 +118,7 @@ Deno.serve(async (req: Request) => {
       const r = await fetch(`${provider.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: { authorization: `Bearer ${provider.key}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 2500, response_format: { type: 'json_object' }, messages }),
+        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4000, response_format: { type: 'json_object' }, messages }),
       })
       if (r.ok) {
         d = await r.json().catch(() => ({}))
