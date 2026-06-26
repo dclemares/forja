@@ -30,6 +30,8 @@ interface Provider {
   baseUrl: string
   key?: string
   models: string[]
+  /** Parámetros extra específicos del proveedor para el cuerpo de la petición. */
+  extra?: Record<string, unknown>
 }
 
 // Orden de proveedores: Gemini primero (Google); si falla, Groq de respaldo.
@@ -39,6 +41,9 @@ const PROVIDERS: Provider[] = [
     baseUrl: (Deno.env.get('GEMINI_BASE_URL') ?? Deno.env.get('AI_BASE_URL') ?? 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, ''),
     key: Deno.env.get('GEMINI_API_KEY') ?? Deno.env.get('AI_API_KEY'),
     models: splitList(Deno.env.get('GEMINI_MODELS') ?? Deno.env.get('AI_MODELS') ?? Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash'),
+    // Limita el "pensamiento" interno de Gemini 2.5: más rápido y evita que se
+    // coma el presupuesto de tokens y trunque el JSON.
+    extra: { reasoning_effort: 'low' },
   },
   {
     name: 'groq',
@@ -53,10 +58,12 @@ const ATTEMPTS = PROVIDERS.filter((p) => p.key).flatMap((p) => p.models.map((mod
 
 const SYSTEM = [
   'Eres un estimador nutricional. Recibes, según disponga el usuario: una foto CENITAL (desde arriba), una foto LATERAL (de lado) y/o una descripción de la comida. Usa lo que haya. Si no hay ninguna foto, estima a partir de la descripción y raciones típicas, con la confianza acorde. Sigue este método sin saltarte pasos.',
-  '1) IDENTIFICA cada alimento e indica si está CRUDO o COCIDO. Clave: arroz, pasta y legumbre CRUDOS tienen ~3× más kcal por gramo que cocidos; no los confundas.',
-  '2) ESCALA: busca un objeto de tamaño conocido en las fotos y úsalo de referencia (moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm). Si dudas cuál es, asume el caso intermedio y dilo.',
-  '3) CALCULA, no estimes a ojo: usa la foto CENITAL para el ÁREA y la LATERAL para el GROSOR. peso ≈ área(cm²) × grosor(cm) × densidad(g/cm³). Densidades aprox.: arroz/legumbre crudos ~0,85 · arroz/pasta cocidos ~0,8 · pan aireado ~0,3 · carne/pescado ~1,05 · verdura ~0,6 · salsa/aceite ~0,95.',
-  '4) SANITY CHECK: contrasta con una ración normal (arroz seco 60-80 g, pasta seca 70-100 g, pan 50-90 g, pechuga 150-250 g, guarnición de verdura 100-200 g). Si te sale el doble de lo típico sin motivo claro, probablemente te has pasado: corrige.',
+  '1) IDENTIFICA cada alimento, si está CRUDO o COCIDO (arroz/pasta/legumbre crudos ~3× más kcal/g que cocidos) y el RECIPIENTE: un plato HONDO o BOL contiene mucho más que un plato llano para la misma área vista desde arriba; tenlo muy en cuenta en fotos cenitales.',
+  '2) ESCALA: busca un objeto de tamaño conocido y úsalo de referencia (moneda de 1€ ≈ 23 mm, cuchara/tenedor ≈ 19-20 cm, plato llano ≈ 26 cm, lata ≈ 33 cl, móvil ≈ 14-16 cm, mano adulta ≈ 18 cm). Si dudas cuál es, asume el caso intermedio y dilo.',
+  '3) CANTIDAD: parte del reconocimiento del alimento, su RACIÓN TÍPICA y el LLENADO del recipiente; usa la geometría (área de la cenital × grosor de la lateral × densidad) como CONTROL para cuadrar, no como verdad absoluta. Densidades aprox.: arroz/legumbre crudos ~0,85 · arroz/pasta cocidos ~0,8 · pan aireado ~0,3 · carne/pescado ~1,05 · verdura ~0,6 · salsa/aceite ~0,95.',
+  '4) GRASA OCULTA: añade el aceite de cocción según el método (es lo que más se infravalora): frito/rebozado +10-20 g, salteado +5-10 g, plancha/horno +2-5 g.',
+  '5) COHERENCIA: para CADA ingrediente, las kcal deben cuadrar con sus macros: kcal ≈ 4·proteína + 4·carbos + 9·grasa. Usa valores nutricionales estándar por 100 g.',
+  '6) REVISA antes de responder: ¿recipiente hondo?, ¿aceite oculto?, ¿kcal cuadra con macros?, ¿total plausible (una comida suele ser 300-900 kcal)?; contrasta con raciones normales (arroz seco 60-80 g, pasta seca 70-100 g, pan 50-90 g, pechuga 150-250 g, verdura 100-200 g) y corrige lo que no cuadre.',
   'Sé BREVE y conciso en los textos (no te enrolles).',
   'En "description" describe en 1-2 frases lo que ves (alimentos, y si están crudos o cocidos), SIN cálculos. Empieza con "Veo…".',
   'En "reasoning" explica el cálculo en máximo 3 frases: la escala usada, el grosor/volumen, la densidad y el peso, y el RANGO de incertidumbre. Si falta una foto o no se aprecia el grosor, dilo y usa "confidence":"baja".',
@@ -118,7 +125,7 @@ Deno.serve(async (req: Request) => {
       const r = await fetch(`${provider.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: { authorization: `Bearer ${provider.key}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4000, response_format: { type: 'json_object' }, messages }),
+        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 5000, response_format: { type: 'json_object' }, messages, ...(provider.extra ?? {}) }),
       })
       if (r.ok) {
         d = await r.json().catch(() => ({}))
@@ -150,14 +157,18 @@ Deno.serve(async (req: Request) => {
     // (si hay), para que el desglose y el total siempre cuadren.
     const rawItems = Array.isArray(parsed.items) ? (parsed.items as Record<string, unknown>[]) : []
     const items = rawItems
-      .map((it) => ({
-        name: String(it?.name ?? '').slice(0, 60),
-        grams: num(it?.grams),
-        kcal: num(it?.kcal),
-        protein: num(it?.protein),
-        carbs: num(it?.carbs),
-        fat: num(it?.fat),
-      }))
+      .map((it) => {
+        const protein = num(it?.protein)
+        const carbs = num(it?.carbs)
+        const fat = num(it?.fat)
+        let kcal = num(it?.kcal)
+        // Coherencia Atwater: si las kcal del modelo se desvían >30% de las que
+        // dan sus macros (4·prot + 4·carb + 9·grasa), usa las de los macros
+        // (más fiables) para evitar cifras incoherentes.
+        const atwater = Math.round(4 * protein + 4 * carbs + 9 * fat)
+        if (atwater > 0 && Math.abs(kcal - atwater) > 0.3 * Math.max(kcal, atwater)) kcal = atwater
+        return { name: String(it?.name ?? '').slice(0, 60), grams: num(it?.grams), kcal, protein, carbs, fat }
+      })
       .filter((it) => it.name)
       .slice(0, 15)
     const hasItems = items.length > 0
